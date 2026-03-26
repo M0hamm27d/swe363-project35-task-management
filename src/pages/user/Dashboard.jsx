@@ -2,4 +2,4 @@ function Dashboard() {
   return <div>Dashboard</div>;
 }
 
-export default LandingPage;
+export default Dashboard;
