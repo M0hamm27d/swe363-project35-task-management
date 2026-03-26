@@ -7,11 +7,11 @@ import UserSignup from "./pages/public/UserSignup";
 import AdminLogin from "./pages/public/AdminLogin";
 
 //User pages
-import Dashboard from "./pages/user/Dashboard";
 import MyTasks from "./pages/user/MyTasks";
 import WorkspaceTasks from "./pages/user/WorkspaceTasks";
 import Calendar from "./pages/user/Calendar";
 import Profile from "./pages/user/Profile";
+import UserLayout from "./layouts/UserLayout";
 
 //Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -24,19 +24,19 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public */
-        /*default route*/}
-        <Route path="/" element={<LandingPage />} /> 
+        {/* Public default route*/}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<UserLogin />} />
         <Route path="/signup" element={<UserSignup />} />
         <Route path="/admin-login" element={<AdminLogin />} />
 
-        {/* User */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/my-tasks" element={<MyTasks />} />
-        <Route path="/workspace" element={<WorkspaceTasks />} />
-        <Route path="/calendar" element={<Calendar />} />
-        <Route path="/profile" element={<Profile />} />
+        {/* USER LAYOUT */}
+        <Route path="/" element={<UserLayout />}>
+        <Route path="my-tasks" element={<MyTasks />} />
+        <Route path="workspace" element={<WorkspaceTasks />} />
+        <Route path="calendar" element={<Calendar />} />
+        <Route path="profile" element={<Profile />} />
+        </Route>
 
         {/* Admin */}
         <Route path="/admin" element={<AdminDashboard />} />
