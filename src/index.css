@@ -1,13 +1,299 @@
-body {
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ─── Shared Input Utilities ─── */
+.input-counter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 4px;
+}
+
+.input-counter {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.input-counter--max {
+  color: #f87171;
+}
+
+.drawer-textarea--error {
+  border-color: #f87171 !important;
+}
+
+/* Global reset — makes box sizing consistent across all elements */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #0f0f13;
+  color: #e8e8f0;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* ─── Shared Task Management Styles ────────────────────────────────────────── */
+
+/* Page Header Row */
+.my-tasks__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.my-tasks__controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Page Title */
+.my-tasks__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e0e8ff;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+/* Sections (Ongoing / Completed) */
+.my-tasks__section {
+  margin-bottom: 40px;
+}
+
+.my-tasks__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.my-tasks__section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5070b0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+/* Task Grid */
+.my-tasks__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+/* ─── Shared Modal Overlays ────────────────────────────────────────────────── */
+
+.tags-modal-overlay,
+.delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.60);
+  backdrop-filter: blur(3px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease;
+}
+
+.delete-modal,
+.tags-modal-box,
+.create-ws-modal,
+.invite-modal,
+.workspace-info-modal {
+  animation: slideUp 0.18s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ─── Common UI Components ────────────────────────────────────────────────── */
+
+/* View Selector */
+.view-selector {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 2px;
+}
+
+.view-selector__btn {
+  padding: 7px 18px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: #5070b0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.view-selector__btn--active {
+  background: #1e4db7;
+  color: #e0eeff;
+  box-shadow: 0 2px 8px rgba(30, 77, 183, 0.4);
+}
+
+/* Floating Action Button */
+.my-tasks__fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: #1e4db7;
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(30, 77, 183, 0.4);
+  z-index: 100;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, box-shadow 0.2s ease;
+  padding: 0;
+}
+
+.my-tasks__fab:hover {
+  background: #2563eb;
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.5);
+}
+
+.my-tasks__fab:active {
+  transform: translateY(0) scale(0.95);
+  box-shadow: 0 4px 12px rgba(30, 77, 183, 0.3);
+}
+
+/* Delete Modal Specifics */
+.delete-modal {
+  background: #0d1526;
+  border: 1px solid #1a2a4a;
+  border-radius: 16px;
+  padding: 28px 32px;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.delete-modal__title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #e0e8ff;
+  margin-bottom: 10px;
+}
+
+.delete-modal__body {
+  font-size: 14px;
+  color: #7090c0;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.delete-modal__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.delete-modal__btn {
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.delete-modal__btn--danger {
+  background: #f87171;
+  color: #0a0f1e;
+}
+
+.delete-modal__btn--cancel {
+  background: rgba(255, 255, 255, 0.07);
+  color: #8090b0;
+}
+
+/* ─── Tags Toggle ───────────────────────────────────────────────────────────── */
+.tags-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  color: #5070b0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.tags-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #a0b8e0;
+}
+
+.tags-toggle-btn--active {
+  background: rgba(30, 77, 183, 0.15);
+  border-color: #1e4db7;
+  color: #4f8ef7;
+}
+
+.tags-toggle-btn--filtered {
+  border-color: #4f8ef7;
+  color: #4f8ef7;
 }
