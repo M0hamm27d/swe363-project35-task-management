@@ -95,186 +95,153 @@ function UserManagement() {
     return "#25c23b";
   };
 
+  const exportUsersAsCSV = () => {
+    // Create CSV header
+    const headers = ["ID", "Name", "Email", "Date of Login", "Status", "Work As", "Status"];
+    
+    // Create CSV rows
+    const rows = filteredUsers.map(user => [
+      user.id,
+      user.name,
+      user.email,
+      user.date,
+      user.status,
+      user.workAs,
+      user.banned ? "Banned" : "Active"
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `users_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div>
-      <h1 style={{ fontSize: "38px", marginTop: "6px", marginBottom: "40px" }}>
-        User Management
-      </h1>
+    <div className="admin-section">
+      <h1 className="admin-page-title">User Management</h1>
 
-      <div style={{ display: "flex", gap: "12px", marginBottom: "20px", flexWrap: "wrap" }}>
-        <input
-          type="text"
-          placeholder="Name"
-          value={newUser.name}
-          onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-          style={inputStyle}
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={newUser.email}
-          onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-          style={inputStyle}
-        />
-        <select
-          value={newUser.workAs}
-          onChange={(e) => setNewUser({ ...newUser, workAs: e.target.value })}
-          style={inputStyle}
-        >
-          <option>Regular user</option>
-          <option>Team leader</option>
-          <option>Admin</option>
-        </select>
-        <button onClick={addUser} style={blueBtn}>
-          ADD USER
-        </button>
-      </div>
+      <div className="admin-panel">
+        <div className="admin-action-bar">
+          <div className="admin-field-group">
+            <input
+              type="text"
+              placeholder="Name"
+              value={newUser.name}
+              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+              className="admin-input"
+            />
+          </div>
+          <div className="admin-field-group">
+            <input
+              type="email"
+              placeholder="Email"
+              value={newUser.email}
+              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+              className="admin-input"
+            />
+          </div>
+          <div className="admin-field-group">
+            <select
+              value={newUser.workAs}
+              onChange={(e) => setNewUser({ ...newUser, workAs: e.target.value })}
+              className="admin-select"
+            >
+              <option>Regular user</option>
+              <option>Team leader</option>
+              <option>Admin</option>
+            </select>
+          </div>
+          <button onClick={addUser} className="admin-btn admin-btn--primary">
+            Add user
+          </button>
+        </div>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          gap: "10px",
-          alignItems: "center",
-          marginBottom: "12px",
-          flexWrap: "wrap",
-        }}
-      >
-        <input
-          type="text"
-          placeholder="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ ...inputStyle, width: "170px", marginBottom: 0 }}
-        />
-        <button style={blueBtn}>ADD USER</button>
-        <button style={grayBtn}>EXPORT</button>
-      </div>
+        <div className="admin-action-bar">
+          <input
+            type="text"
+            placeholder="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="admin-input"
+            style={{ maxWidth: 240 }}
+          />
+          <button onClick={exportUsersAsCSV} className="admin-btn admin-btn--secondary">
+            Export to PDF
+          </button>
+        </div>
 
-      <div style={{ overflowX: "auto" }}>
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            background: "#fff",
-            boxShadow: "0 1px 6px rgba(0,0,0,0.08)",
-          }}
-        >
-          <thead>
-            <tr style={{ borderBottom: "1px solid #ddd", height: "48px" }}>
-              <th style={thStyle}></th>
-              <th style={thStyle}>NAME</th>
-              <th style={thStyle}>E-MAIL</th>
-              <th style={thStyle}>DATA OF LOG IN</th>
-              <th style={thStyle}>STATUS</th>
-              <th style={thStyle}>ID</th>
-              <th style={thStyle}>WORK AS</th>
-              <th style={thStyle}>ACTION</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map((user) => (
-              <tr key={user.id} style={{ borderBottom: "1px solid #eee", height: "62px" }}>
-                <td style={tdStyle}>
-                  <input type="checkbox" />
-                </td>
-                <td style={tdStyle}>{user.name}</td>
-                <td style={{ ...tdStyle, color: "#6495ed" }}>{user.email}</td>
-                <td style={tdStyle}>{user.date}</td>
-                <td style={tdStyle}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div
-                      style={{
-                        width: "58px",
-                        height: "4px",
-                        background: "#ddd",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: user.status,
-                          height: "4px",
-                          background: getBarColor(user.status),
-                          borderRadius: "4px",
-                        }}
-                      ></div>
-                    </div>
-                    {user.status}
-                  </div>
-                </td>
-                <td style={tdStyle}>{user.id}</td>
-                <td style={tdStyle}>{user.workAs}</td>
-                <td style={tdStyle}>
-                  <button onClick={() => toggleBan(user.id)} style={user.banned ? unbanBtn : banBtn}>
-                    {user.banned ? "Unban" : "Ban"}
-                  </button>
-                </td>
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Name</th>
+                <th>E-mail</th>
+                <th>Date of log in</th>
+                <th>Status</th>
+                <th>ID</th>
+                <th>Work as</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>
+                    <input type="checkbox" />
+                  </td>
+                  <td>{user.name}</td>
+                  <td style={{ color: "#4f8ef7" }}>{user.email}</td>
+                  <td>{user.date}</td>
+                  <td>
+                    <div className="admin-status-bar">
+                      <div className="admin-status-track">
+                        <div
+                          className={`admin-status-fill ${
+                            user.status === "20%"
+                              ? "admin-status-fill--low"
+                              : user.status === "50%"
+                              ? "admin-status-fill--medium"
+                              : "admin-status-fill--high"
+                          }`}
+                          style={{ width: user.status }}
+                        />
+                      </div>
+                      <span>{user.status}</span>
+                    </div>
+                  </td>
+                  <td>{user.id}</td>
+                  <td>{user.workAs}</td>
+                  <td>
+                    <button
+                      onClick={() => toggleBan(user.id)}
+                      className={`admin-btn ${user.banned ? "admin-btn--secondary" : "admin-btn--danger"}`}
+                    >
+                      {user.banned ? "Unban" : "Ban"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 }
-
-const inputStyle = {
-  padding: "10px 12px",
-  border: "1px solid #ccc",
-  borderRadius: "6px",
-  outline: "none",
-  background: "#fff",
-};
-
-const blueBtn = {
-  padding: "10px 16px",
-  background: "#2f80ed",
-  color: "#fff",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontWeight: "600",
-};
-
-const grayBtn = {
-  padding: "10px 16px",
-  background: "#f2f2f2",
-  color: "#666",
-  border: "1px solid #ccc",
-  borderRadius: "6px",
-  cursor: "pointer",
-};
-
-const banBtn = {
-  padding: "7px 14px",
-  background: "#ffe2e2",
-  color: "#d64545",
-  border: "1px solid #f2b7b7",
-  borderRadius: "6px",
-  cursor: "pointer",
-};
-
-const unbanBtn = {
-  padding: "7px 14px",
-  background: "#e2ffe7",
-  color: "#1d8b37",
-  border: "1px solid #9fe5b0",
-  borderRadius: "6px",
-  cursor: "pointer",
-};
-
-const thStyle = {
-  fontSize: "12px",
-  color: "#666",
-  textAlign: "left",
-  padding: "12px 14px",
-};
-
-const tdStyle = {
-  fontSize: "14px",
-  color: "#333",
-  padding: "12px 14px",
-};
 
 export default UserManagement;
