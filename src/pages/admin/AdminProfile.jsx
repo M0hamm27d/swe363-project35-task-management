@@ -1,163 +1,193 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Logo from "../../components/Logo";
+import "../public/UserSignup.css";
+import "../user/Profile.css";
+
+const UserIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
 
 function AdminProfile() {
-  
   const navigate = useNavigate();
+  
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: ""
+  });
 
-  const [email, setEmail] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [passFocused, setPassFocused] = useState(false);
+  const [confirmFocused, setConfirmFocused] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [error, setError] = useState("");
 
-  const [password, setPassword] = useState("");
-
-  const handleConfirm = () => {
-    alert("Profile updated");
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
   const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
 
+  const handleConfirmChanges = (e) => {
+    e.preventDefault();
+    if (formData.password && formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setShowConfirm(true);
+  };
+
+  const finalizeChanges = () => {
+    // In a real app, we'd call an API here
     navigate("/admin-login");
   };
 
-
-
+  const finalizeLogout = () => {
+    setShowLogoutConfirm(false);
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      navigate("/admin-login");
+    }, 2500);
+  };
 
   return (
-    <div style={{ minHeight: "calc(100vh - 56px)", position: "relative" }}>
-      <div
-        style={{
-          width: "280px",
-          height: "220px",
-          background: "#d8dce3",
-          borderRadius: "52% 48% 45% 55% / 45% 45% 55% 55%",
+    <div className="profile-page">
+      <div className="signup-card">
+        <header className="signup-header">
+          <div className="user-icon-wrapper"><UserIcon /></div>
+          <Logo size="medium" isPrivacyMode={(passFocused && !showPass) || (confirmFocused && !showConfirmPass)} />
+          <h2 className="welcome-msg">Edit Profile</h2>
+        </header>
 
-          margin: "0 auto 40px auto",
-          position: "relative",
-        }}
-      >
-        <div
-          style={{
-            width: "150px",
-            height: "150px",
-            border: "2px solid #333",
-            borderRadius: "50%",
-            position: "absolute",
-            top: "28px",
-            left: "50%",
+        <form className="signup-form" onSubmit={handleConfirmChanges}>
+          <div className="input-group">
+            <label className="input-label" htmlFor="email">Change Email Address</label>
+            <input id="email" type="email" className="signup-input" value={formData.email} onChange={handleChange} required />
+          </div>
 
-            transform: "translateX(-50%)",
-          }}
-        >
-          <div
-            style={{
-              width: "44px",
-              height: "44px",
-              border: "2px solid #333",
+          <div className="input-group">
+            <label className="input-label" htmlFor="password">Change Password</label>
+            <div className="input-field-wrapper">
+              <input
+                id="password"
+                type={showPass ? "text" : "password"}
+                className="signup-input"
+                placeholder="Enter new password"
+                value={formData.password}
+                onChange={handleChange}
+                onFocus={() => setPassFocused(true)}
+                onBlur={() => setPassFocused(false)}
+              />
+              <button type="button" className="eye-toggle-btn" onClick={() => setShowPass(!showPass)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {showPass ? (
+                    <>
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </>
+                  ) : (
+                    <>
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </>
+                  )}
+                </svg>
+              </button>
+            </div>
+          </div>
 
-              borderRadius: "50%",
-              position: "absolute",
-              top: "26px",
-              left: "50%",
-              transform: "translateX(-50%)",
-            }}
-          ></div>
-          <div
-            style={{
-              width: "88px",
-              height: "42px",
-              border: "2px solid #333",
-              borderTopLeftRadius: "60px",
+          <div className="input-group">
+            <label className="input-label" htmlFor="confirmPassword">Confirm New Password</label>
+            <div className="input-field-wrapper">
+              <input
+                id="confirmPassword"
+                type={showConfirmPass ? "text" : "password"}
+                className="signup-input"
+                placeholder="Repeat new password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                onFocus={() => setConfirmFocused(true)}
+                onBlur={() => setConfirmFocused(false)}
+              />
+              <button type="button" className="eye-toggle-btn" onClick={() => setShowConfirmPass(!showConfirmPass)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {showConfirmPass ? (
+                    <>
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </>
+                  ) : (
+                    <>
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </>
+                  )}
+                </svg>
+              </button>
+            </div>
+          </div>
 
-              borderTopRightRadius: "60px",
-              borderBottom: "none",
-              position: "absolute",
-              bottom: "20px",
-              left: "50%",
-              transform: "translateX(-50%)",
-            }}
-          ></div>
-        </div>
+          {error && <div className="signup-error">{error}</div>}
+
+          <div className="profile-actions">
+            <button type="submit" className="signup-btn-primary">Confirm Changes</button>
+            <button type="button" className="logout-btn-secondary" onClick={handleLogout}>Log Out</button>
+          </div>
+        </form>
       </div>
 
-      <div style={{ width: "440px", margin: "0 auto" }}>
-        <div style={{ fontSize: "22px", fontWeight: "700", marginBottom: "10px" }}>
-          Change Email
+      {showConfirm && (
+        <div className="confirmation-overlay">
+          <div className="confirmation-card">
+            <h3>Confirm Profile Changes</h3>
+            <p>Are you sure you want to change your info? This will log you out automatically to apply the updates.</p>
+            <div className="modal-buttons">
+              <button className="confirm-yes" onClick={finalizeChanges}>Yes, Update & Logout</button>
+              <button className="confirm-no" onClick={() => setShowConfirm(false)}>Cancel</button>
+            </div>
+          </div>
         </div>
+      )}
 
-
-        <input
-          type="email"
-          placeholder="Eenter your new email"
-
-
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={fieldStyle}
-        />
-        <div style={{ fontSize: "22px", fontWeight: "700", marginBottom: "10px" }}>
-          Change Password
+      {showLogoutConfirm && (
+        <div className="confirmation-overlay">
+          <div className="confirmation-card">
+            <div className="modal-icon-logout">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </div>
+            <h3>Log Out?</h3>
+            <p>Are you sure you want to log out of your account? Any unsaved progress will be lost.</p>
+            <div className="modal-buttons">
+              <button className="confirm-yes confirm-logout" onClick={finalizeLogout}>Yes, Log Out</button>
+              <button className="confirm-no" onClick={() => setShowLogoutConfirm(false)}>Stay Signed In</button>
+            </div>
+          </div>
         </div>
-        <input
-          type="password"
-          placeholder="Enter your new password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={fieldStyle}
-        />
-      </div>
+      )}
 
-      <button
-        onClick={handleLogout}
-        style={{
-          position: "absolute",
-          left: "40px",
-          bottom: "30px",
-          width: "170px",
-          padding: "14px 16px",
-          borderRadius: "6px",
-
-          background: "#fff",
-          border: "1px solid #333",
-          color: "red",
-          fontSize: "16px",
-          cursor: "pointer",
-        }}
-      >
-        Log Out
-      </button>
-
-      <button
-        onClick={handleConfirm}
-        style={{
-          position: "absolute",
-          right: "20px",
-          bottom: "30px",
-
-
-          width: "160px",
-          padding: "14px 16px",
-          borderRadius: "6px",
-          background: "#fff",
-          border: "1px solid #333",
-          color: "#111",
-          fontSize: "16px",
-          fontWeight: "600",
-          cursor: "pointer",
-        }}
-      >
-        Confirm
-      </button>
+      {isLoggingOut && (
+        <div className="logout-transition-overlay">
+          <div className="logout-center-content">
+            <Logo size="xl" isClosing={true} />
+            <p className="logout-msg">See you soon...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-const fieldStyle = {
-  width: "100%",
-  marginBottom: "20px",
-  padding: "16px",
-  background: "#ececf3",
-  border: "none",
-  outline: "none",
-  fontSize: "16px",
-};
 
 export default AdminProfile;
