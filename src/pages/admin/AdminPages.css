@@ -177,9 +177,102 @@
 
 .admin-input:focus,
 .admin-textarea:focus,
-.admin-select:focus {
+.admin-select:focus,
+.admin-custom-select:focus {
   border-color: #4f8ef7;
   background: rgba(30, 77, 183, 0.18);
+  box-shadow: 0 0 0 4px rgba(79, 142, 247, 0.1);
+}
+
+.admin-custom-select {
+  position: relative;
+  width: 100%;
+  min-width: 140px;
+}
+
+.admin-custom-select__trigger {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f8fafc;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-custom-select__trigger:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.admin-custom-select__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #0f0f13;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  z-index: 1000;
+  padding: 8px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  animation: adminDropdownSlideIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes adminDropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.admin-custom-select__option {
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-custom-select__option:hover {
+  background: rgba(30, 77, 183, 0.25);
+  color: #f8fafc;
+  padding-left: 18px;
+}
+
+.admin-custom-select__option--active {
+  background: rgba(47, 128, 237, 0.2);
+  color: #4f8ef7;
+}
+
+.admin-custom-select__chevron {
+  transition: transform 0.2s ease;
+}
+
+.admin-custom-select--open .admin-custom-select__chevron {
+  transform: rotate(180deg);
+}
+
+.admin-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 14px;
+  cursor: pointer;
 }
 
 .admin-textarea {
@@ -257,6 +350,97 @@
 
 .admin-table tr {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Custom Admin Checkboxes */
+.admin-checkbox-container {
+  display: block;
+  position: relative;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.admin-checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.admin-checkbox-container:hover input ~ .admin-checkmark {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(79, 142, 247, 0.4);
+}
+
+.admin-checkbox-container input:checked ~ .admin-checkmark {
+  background: #2f80ed;
+  border-color: #2f80ed;
+  box-shadow: 0 4px 12px rgba(47, 128, 237, 0.3);
+}
+
+.admin-checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.admin-checkbox-container input:checked ~ .admin-checkmark:after {
+  display: block;
+}
+
+.admin-checkbox-container .admin-checkmark:after {
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+}
+
+/* Role Badges */
+.admin-role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+}
+
+.admin-role-badge--admin {
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.admin-role-badge--leader {
+  background: rgba(30, 77, 183, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(30, 77, 183, 0.25);
+}
+
+.admin-role-badge--user {
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .admin-table tr:hover {

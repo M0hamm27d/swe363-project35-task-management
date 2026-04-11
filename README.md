@@ -1,110 +1,90 @@
-# UrgenSee | Interactive Task Management
+# 👁️ UrgenSee | Smart Task Management
 
-**Master your task density and optimize your schedule with smart urgency indicators.**
+> **Master your task density and optimize your schedule with smart urgency indicators.**
 
-UrgenSee is a modern, interactive task management system built with React. It features a professional design system focused on "task density," allowing users to manage complex workflows through intuitive workspaces, dynamic calendars, and real-time urgency metrics.
+UrgenSee is a premium, interactive React-based task management system designed to solve the chaos of modern workflows. By focusing on **Task Density** and **Smart Urgency**, we help teams visualize their most critical work at a glance.
 
 ---
 
-## 🛠️ Setup and Installation
+## ✨ Features that WOW
 
-Follow these steps to get the project running locally:
+-   **🧠 Smart Eye Tracking**: Our "UrgenSee" logo eyes react to your every move, globally tracking your cursor with a playful yet functional focus.
+-   **🔐 Context-Aware Privacy**: Sensitive password fields trigger "Privacy Mode," causing the logo eyes to look away—respecting your data security visually.
+-   **📊 Task Density Heatmap**: Visualize your workload through color-coded status indicators (Admin Dashboard & Personal Tasks).
+-   **🏢 Workspace Ecosystem**: Seamlessly transition between personal boards and team workspaces with specific leadership roles.
+-   **📅 Fluid Calendar System**: A custom-built scheduling interface with dynamic row expansion and overlapping task management.
+
+---
+
+## 🛠️ Technology Stack
+
+-   **Frontend**: React (Hooks, Context API, Router)
+-   **Styling**: Pure Vanilla CSS (Premium Design System)
+-   **Visuals**: Custom SVG Eye Engine (Native JavaScript & CSS Variables)
+-   **Icons**: Hand-crafted SVG Design Iconography
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v16 or higher)
-- npm (comes with Node.js)
+-   **Node.js**: v16+ recommended
+-   **Git**: For repository management
 
-### Installation
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/M0hamm27d/swe363-project35-task-management.git
-   ```
-
-2. **Navigate to the project directory:**
-   ```bash
-   cd swe363-project35-task-management
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-4. **Start the development server:**
-   ```bash
-   npm start
-   ```
-   The application will be available at `http://localhost:3000`.
+### Quick Setup
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/M0hamm27d/swe363-project35-task-management.git
+    ```
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
+3.  **Launch the App**
+    ```bash
+    npm start
+    ```
+    Access the interactive experience at `http://localhost:3000`.
 
 ---
 
-## 🚀 Usage Instructions
+## 👥 Meet Team G35
 
-### 🔐 Authentication
-- **User Login/Signup:** Access the main dashboard to manage your personal tasks.
-- **Admin Access:** Navigate to `/admin-login` for administrative oversight.
+Our team focused on translating complex task management requirements into a premium interactive experience.
 
-### 📋 Workspace Management
-- Create multiple workspaces for different teams or projects.
-- Invite members and manage roles (Leader vs. Member).
-- Use the **Workspace Board** to organize tasks by status (To Do, In Progress, Done).
-
-### 📅 Smart Calendar
-- View tasks in a dynamic week or month view.
-- Tasks are color-coded by workspace for quick recognition.
-- Interactive "Task Density" heatmap visualization.
-
-### ✨ Interactive Logo
-- The "UrgenSee" logo eyes will track your cursor globally.
-- In sensitive fields (like passwords), the eyes will enter "Privacy Mode" and look away.
-
----
-
-## 👥 Team Members and Roles
-
-| Name | Role | GitHub |
+| Member | Role & Contributions | GitHub |
 | :--- | :--- | :--- |
-| **[Mohammed Alrashid]** | [User UI/UX Creation , Logic , Theme & Logo Design] | [M0hamm27d] |
-| **[Omar Alshehri]** | [Admin UI Creation] | [OmarAlshehri0] |
-| **[Mohammed Alzaid]** | [Admin UI/UX enhancment & logic] | [suleiman-MBS] |
-| **[Elyas Elamri]** | [Reviewer , Tester , and Documentation related] | [elyalam] |
-
-
----
-
-## 📄 Additional Documentation
-
-### Environment Variables
-Currently, this is a front-end prototype and does not require external API keys. However, for future backend integration:
-- Create a `.env` file in the root directory.
-- Define variables such as `REACT_APP_API_URL`.
-- **Note:** The `.env` file is excluded from version control via `.gitignore` to protect sensitive data.
+| **Mohammed Alrashid** | User UI/UX Creation, Logic, Theme & Logo Design | [@M0hamm27d](https://github.com/M0hamm27d) |
+| **Omar Alshehri** | Admin UI Foundation & Core Layouts | [@OmarAlshehri0](https://github.com/OmarAlshehri0) |
+| **Mohammed Alzaid** | Admin UI/UX Enhancement & Functional Logic | [@suleiman-MBS](https://github.com/suleiman-MBS) |
+| **Elyas Elamri** | Reviewer, System Tester, and Documentation | [@elyalam](https://github.com/elyalam) |
 
 ---
 
-## 📁 Repository Structure
+## 🏗️ Project Architecture
 
-The project follows a modular, logical structure to ensure scalability and maintainability:
+We follow a modular directory structure designed for scalability and logical grouping:
 
 ```text
 swe363-project35-task-management/
-├── public/                 # Static assets and index.html
 ├── src/
-│   ├── components/         # Reusable UI components (Logo, TaskCard, etc.)
-│   ├── context/            # Global state management (Tasks, Workspaces)
-│   ├── data/               # Mock data for prototyping
-│   ├── layouts/            # Page shell layouts (Sidebar, Footer)
-│   ├── pages/              # Main page views (Login, Dashboard, Calendar)
-│   ├── utils/              # Helper functions and calculators
-│   ├── App.js              # Root component & Routing
-│   └── index.css           # Global styles and design system tokens
-├── .gitignore              # Excluded files (node_modules, .env, build)
-└── package.json            # Dependencies and scripts
+│   ├── components/      # Standalone UI components (Logo, TaskCard, Tags)
+│   ├── context/         # Centralized state (Tasks, User, Workspaces)
+│   ├── data/            # Mock datasets for rapid prototyping
+│   ├── layouts/         # Shared page templates (Sidebar, User View)
+│   ├── pages/
+│   │   ├── admin/       # Management, Dashboard, Settings
+│   │   ├── public/      # Landing, Login, Signup
+│   │   └── user/        # Personal Tasks, Boards, Calendar
+│   ├── utils/           # Logic helpers (Density calculators, Date formatting)
+│   └── index.css        # Global CSS Design System variables
+└── README.md
 ```
 
 ---
 
-## 🛡️ Best Practices
-- **Clean History:** Atomic commits that group related changes logically.
-- **Privacy:** Sensitive information and build artifacts are excluded using a comprehensive `.gitignore`.
-- **Responsive Design:** Optimized for both desktop and mobile viewports.
+## 🛡️ Best Practices & Security
+-   **Zero Hardcoding**: All configuration is managed via external files or props.
+-   **Environmental Safety**: Sensitive files like `.env` and `node_modules` are strictly excluded via `.gitignore`.
+-   **Accessibility**: High-contrast dark modes and ARIA labels for interactive elements.
+-   **Performance**: Optimized SVG animations for 60fps interaction.

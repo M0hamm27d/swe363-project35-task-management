@@ -56,6 +56,9 @@ function UserManagement() {
     workAs: "Regular user",
   });
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const roles = ["Regular user", "Team leader", "Admin"];
+
   const filteredUsers = useMemo(() => {
     return users.filter(
       (user) =>
@@ -89,10 +92,13 @@ function UserManagement() {
     setNewUser({ name: "", email: "", workAs: "Regular user" });
   };
 
-  const getBarColor = (value) => {
-    if (value === "20%") return "#f39c12";
-    if (value === "50%") return "#f1c40f";
-    return "#25c23b";
+  // Removed unused getBarColor to clean up ESLint warnings
+  
+  const getRoleBadgeClass = (role) => {
+    const r = role.toLowerCase();
+    if (r === "admin") return "admin-role-badge--admin";
+    if (r === "team leader") return "admin-role-badge--leader";
+    return "admin-role-badge--user";
   };
 
   const exportUsersAsCSV = () => {
@@ -155,15 +161,36 @@ function UserManagement() {
             />
           </div>
           <div className="admin-field-group">
-            <select
-              value={newUser.workAs}
-              onChange={(e) => setNewUser({ ...newUser, workAs: e.target.value })}
-              className="admin-select"
+            <div 
+              className={`admin-custom-select ${isDropdownOpen ? 'admin-custom-select--open' : ''}`}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <option>Regular user</option>
-              <option>Team leader</option>
-              <option>Admin</option>
-            </select>
+              <div className="admin-custom-select__trigger">
+                <span>{newUser.workAs}</span>
+                <div className="admin-custom-select__chevron">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </div>
+              </div>
+              
+              {isDropdownOpen && (
+                <div className="admin-custom-select__menu">
+                  {roles.map((role) => (
+                    <div 
+                      key={role}
+                      className={`admin-custom-select__option ${newUser.workAs === role ? 'admin-custom-select__option--active' : ''}`}
+                      onClick={() => {
+                        setNewUser({ ...newUser, workAs: role });
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      {role}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <button onClick={addUser} className="admin-btn admin-btn--primary">
             Add user
@@ -202,7 +229,10 @@ function UserManagement() {
               {filteredUsers.map((user) => (
                 <tr key={user.id}>
                   <td>
-                    <input type="checkbox" />
+                    <label className="admin-checkbox-container">
+                      <input type="checkbox" />
+                      <span className="admin-checkmark"></span>
+                    </label>
                   </td>
                   <td>{user.name}</td>
                   <td style={{ color: "#4f8ef7" }}>{user.email}</td>
@@ -225,7 +255,11 @@ function UserManagement() {
                     </div>
                   </td>
                   <td>{user.id}</td>
-                  <td>{user.workAs}</td>
+                  <td>
+                    <span className={`admin-role-badge ${getRoleBadgeClass(user.workAs)}`}>
+                      {user.workAs}
+                    </span>
+                  </td>
                   <td>
                     <button
                       onClick={() => toggleBan(user.id)}
