@@ -31,6 +31,7 @@ function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [error, setError] = useState('');
 
   const validatePassword = (pass) => {
@@ -72,7 +73,7 @@ function AdminLogin() {
           <div className="user-icon-wrapper">
             <AdminIcon />
           </div>
-          <Logo size="medium" />
+          <Logo size="medium" isPrivacyMode={isPasswordFocused && !showPassword} />
           <h2 className="welcome-msg">Welcome Admin</h2>
         </header>
 
@@ -103,6 +104,8 @@ function AdminLogin() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => setIsPasswordFocused(false)}
                 required
               />
               <button
