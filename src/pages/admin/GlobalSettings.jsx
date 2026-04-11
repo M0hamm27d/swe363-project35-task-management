@@ -12,113 +12,79 @@ function GlobalSettings() {
   };
 
   return (
-    <div>
-      <h1 style={{ fontSize: "34px", marginTop: "10px", marginBottom: "40px" }}>
-        Global Settings
-      </h1>
+    <div className="admin-section">
+      <h1 className="admin-page-title">Global Settings</h1>
 
-      <div style={{ display: "flex", gap: "140px", flexWrap: "wrap", marginBottom: "40px" }}>
-        <div>
-          <h2 style={{ fontSize: "30px", marginBottom: "24px" }}>Follow Us:</h2>
-
-          <div style={iconRowStyle}>
-            <span style={iconStyle}>𝕏</span>
-            <input
-              value={twitter}
-              onChange={(e) => setTwitter(e.target.value)}
-              style={inputStyle}
-            />
+      <div className="admin-panel admin-form-grid">
+        <div className="admin-field-group">
+          <h2 className="admin-section-heading">Follow Us</h2>
+          <div className="admin-field-group">
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <span style={{ fontSize: "28px", minWidth: "36px", textAlign: "center" }}>𝕏</span>
+              <input
+                value={twitter}
+                onChange={(e) => setTwitter(e.target.value)}
+                className="admin-input"
+                placeholder="Twitter URL"
+              />
+            </div>
           </div>
-
-          <div style={iconRowStyle}>
-            <span style={iconStyle}>◎</span>
-            <input
-              value={instagram}
-              onChange={(e) => setInstagram(e.target.value)}
-              style={inputStyle}
-            />
+          <div className="admin-field-group">
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <span style={{ fontSize: "28px", minWidth: "36px", textAlign: "center" }}>◎</span>
+              <input
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+                className="admin-input"
+                placeholder="Instagram URL"
+              />
+            </div>
           </div>
-
-          <div style={iconRowStyle}>
-            <span style={iconStyle}>in</span>
-            <input
-              value={linkedin}
-              onChange={(e) => setLinkedin(e.target.value)}
-              style={inputStyle}
-            />
+          <div className="admin-field-group">
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <span style={{ fontSize: "28px", minWidth: "36px", textAlign: "center" }}>in</span>
+              <input
+                value={linkedin}
+                onChange={(e) => setLinkedin(e.target.value)}
+                className="admin-input"
+                placeholder="LinkedIn URL"
+              />
+            </div>
           </div>
         </div>
 
-        <div>
-          <h2 style={{ fontSize: "30px", marginBottom: "24px" }}>Contact Us:</h2>
-
-          <div style={{ marginBottom: "18px" }}>
-            <div style={labelStyle}>Number :</div>
+        <div className="admin-field-group">
+          <h2 className="admin-section-heading">Contact Us</h2>
+          <div className="admin-field-group">
+            <label className="admin-text" htmlFor="contact-number">
+              Number
+            </label>
             <input
+              id="contact-number"
               value={number}
               onChange={(e) => setNumber(e.target.value)}
-              style={inputStyle}
+              className="admin-input"
             />
           </div>
-
-          <div style={{ marginBottom: "18px" }}>
-            <div style={labelStyle}>Email :</div>
+          <div className="admin-field-group">
+            <label className="admin-text" htmlFor="contact-email">
+              Email
+            </label>
             <input
+              id="contact-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={inputStyle}
+              className="admin-input"
             />
           </div>
         </div>
       </div>
 
-      <button
-        onClick={saveSettings}
-        style={{
-          marginTop: "28px",
-          background: "#2f80ed",
-          color: "#fff",
-          border: "none",
-          borderRadius: "10px",
-          padding: "14px 24px",
-          fontSize: "18px",
-          fontWeight: "700",
-          cursor: "pointer",
-        }}
-      >
+      <button onClick={saveSettings} className="admin-btn admin-btn--primary">
         Save Changes
       </button>
     </div>
   );
 }
-
-const iconRowStyle = {
-  display: "flex",
-  alignItems: "center",
-  gap: "18px",
-  marginBottom: "18px",
-};
-
-const iconStyle = {
-  fontSize: "38px",
-  width: "40px",
-  textAlign: "center",
-  fontWeight: "700",
-};
-
-const labelStyle = {
-  fontSize: "18px",
-  marginBottom: "8px",
-};
-
-const inputStyle = {
-  width: "320px",
-  maxWidth: "100%",
-  padding: "10px 12px",
-  border: "1px solid #ccc",
-  borderRadius: "8px",
-  outline: "none",
-  fontSize: "15px",
-};
 
 export default GlobalSettings;
