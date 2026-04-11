@@ -1,0 +1,515 @@
+/* Specific styles for WorkspaceBoard page (most common styles inherited from index.css) */
+
+.workspace-board-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.workspace-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #7090c0;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.workspace-more-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e8e8f0;
+}
+
+.workspace-more-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ─── Shared Task Helpers (copied from my-tasks for consistency) ─── */
+
+.my-tasks__count {
+  background: rgba(79, 142, 247, 0.15);
+  color: #4f8ef7;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.my-tasks__clear-btn {
+  background: transparent;
+  border: none;
+  color: #7090c0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.my-tasks__clear-btn:hover { background: rgba(248, 113, 113, 0.1); color: #f87171; }
+.my-tasks__section-title--completed { color: #3d5080; }
+.my-tasks__empty { color: #3d5080; font-size: 15px; font-weight: 500; padding: 20px 0; }
+
+/* ─── Workspace Info Modal ────────────────────────────────────────────── */
+.workspace-info-modal {
+  background: #0d1526;
+  border: 1px solid #1a2a4a;
+  border-radius: 16px;
+  width: 95%;
+  max-width: 520px;
+  max-height: 90vh; /* Prevent modal from taking full vertical space */
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin: auto; /* Extra insurance for centering within the flex overlay */
+}
+
+.workspace-info-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s ease;
+}
+.workspace-info-close:hover { background: rgba(0, 0, 0, 0.5); }
+
+.workspace-info-header {
+  padding: 40px 32px 32px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ws-color) 40%, #111827), var(--ws-color));
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.workspace-info-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+}
+
+.workspace-info-header h2 { 
+  margin: 0 0 10px 0; 
+  font-size: 28px; 
+  font-weight: 800; 
+  color: #fff; 
+  letter-spacing: -0.5px;
+}
+.workspace-info-header p { 
+  margin: 0; 
+  font-size: 15px; 
+  color: rgba(255, 255, 255, 0.9); 
+  line-height: 1.6;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.workspace-info-body { 
+  padding: 32px 32px 40px; /* Increased bottom padding */
+  flex: 1;
+  overflow-y: auto;
+  /* Premium Scrollbar for body */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.workspace-info-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.workspace-info-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.workspace-info-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.workspace-info-body h3 { 
+  margin: 0 0 18px 0; 
+  font-size: 13px; 
+  font-weight: 700; 
+  color: #7090c0; 
+  text-transform: uppercase; 
+  letter-spacing: 1px;
+}
+
+.workspace-member-list { 
+  list-style: none; 
+  padding: 0; 
+  margin: 0; 
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 8px;
+  /* Premium Scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.workspace-member-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.workspace-member-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.workspace-member-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.workspace-member-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Make list two columns on wider modals */
+@media (min-width: 480px) {
+  .workspace-member-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.workspace-member-item { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  padding: 10px 14px; 
+  border-radius: 12px; 
+  background: rgba(255, 255, 255, 0.03); 
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+.workspace-member-item:hover { 
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.workspace-member-avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--ws-color);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.workspace-member-name { 
+  font-size: 14px; 
+  font-weight: 600; 
+  color: #e8e8f0; 
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspace-leader-badge { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  width: 16px; 
+  height: 16px; 
+  color: #fbbf24;
+  margin-left: 4px;
+}
+
+/* ─── Member Dropdown Menu ─── */
+.member-menu-wrapper { position: relative; margin-left: auto; }
+.member-menu-btn { 
+  background: none; 
+  border: none; 
+  color: #5a6a90; 
+  font-size: 20px; 
+  cursor: pointer; 
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+.member-menu-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+.member-dropdown { 
+  position: absolute; 
+  right: 0; 
+  top: 100%; 
+  background: #0d1526; 
+  border: 1px solid #1a2a4a; 
+  border-radius: 12px; 
+  padding: 6px; 
+  min-width: 150px; 
+  z-index: 50; 
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+}
+
+.member-dropdown__item { 
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%; 
+  padding: 10px 14px; 
+  border: none; 
+  background: none; 
+  border-radius: 8px; 
+  font-size: 13px; 
+  font-weight: 600;
+  color: #a0b8e0;
+  cursor: pointer; 
+  text-align: left; 
+  transition: all 0.2s ease;
+}
+
+.member-dropdown__item--danger { color: #f87171; }
+.member-dropdown__item--danger:hover { 
+  background: rgba(248, 113, 113, 0.12); 
+  color: #fca5a5;
+  transform: translateX(2px);
+}
+
+/* ─── Invite & Leave Buttons ─── */
+.workspace-invite-member-btn,
+.workspace-leave-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 20px;
+  width: 100%;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.workspace-invite-member-btn {
+  border: 1px solid rgba(79, 142, 247, 0.2);
+  background: rgba(30, 77, 183, 0.1);
+  color: #4f8ef7;
+}
+.workspace-invite-member-btn:hover {
+  background: #1e4db7;
+  color: #fff;
+  border-color: #1e4db7;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(30, 77, 183, 0.3);
+}
+
+.workspace-leave-btn {
+  border: 1px solid rgba(248, 113, 113, 0.15);
+  background: rgba(248, 113, 113, 0.05);
+  color: #f87171;
+}
+.workspace-leave-btn:hover { 
+  background: rgba(248, 113, 113, 0.12); 
+  border-color: rgba(248, 113, 113, 0.4); 
+  transform: translateY(-1px);
+}
+
+/* ─── Invite Modal ────────────────────────────────────────────────── */
+.invite-modal { 
+  background: #0d1526; 
+  border: 1px solid #1a2a4a; 
+  border-radius: 20px; 
+  padding: 32px; 
+  width: 95%; 
+  max-width: 480px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+}
+
+.invite-modal__header { 
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px; 
+}
+.invite-modal__title { 
+  font-size: 20px; 
+  font-weight: 800; 
+  color: #fff; 
+  letter-spacing: -0.5px; 
+  margin: 0;
+}
+
+.create-ws-modal__close {
+  background: transparent;
+  border: none;
+  color: #7080a0;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+.create-ws-modal__close:hover { color: #fff; }
+
+.invite-modal__subtitle { 
+  font-size: 14px; 
+  color: #7090c0; 
+  margin: 0 0 24px 0; 
+  font-weight: 500;
+  line-height: 1.5; 
+}
+
+.invite-modal__section { display: flex; flex-direction: column; gap: 10px; }
+
+.create-ws-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #5070b0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.invite-email-row { display: flex; gap: 12px; }
+
+.invite-send-btn { 
+  padding: 0 20px; 
+  height: 44px;
+  border-radius: 10px; 
+  border: none; 
+  background: #1e4db7; 
+  color: #fff; 
+  font-size: 14px; 
+  font-weight: 700; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.invite-send-btn:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+
+.invite-success-msg {
+  font-size: 13px;
+  color: #4ade80;
+  font-weight: 600;
+  margin: 4px 0 0 0;
+}
+
+.create-ws-error {
+  font-size: 13px;
+  color: #f87171;
+  font-weight: 600;
+  margin: 4px 0 0 0;
+}
+
+.invite-modal__divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  color: #3d5080;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.invite-modal__divider::before,
+.invite-modal__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.invite-link-hint {
+  font-size: 12px;
+  color: #5a7090;
+  margin: 8px 0 0 0;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Invite Link Area */
+.invite-link-row { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  background: rgba(0, 0, 0, 0.2); 
+  border: 1px solid rgba(255, 255, 255, 0.05); 
+  border-radius: 12px; 
+  padding: 10px 14px;
+  transition: border-color 0.2s ease;
+}
+.invite-link-row:hover { border-color: rgba(255, 255, 255, 0.15); }
+
+.invite-link-display { 
+  flex: 1; 
+  font-size: 13px; 
+  color: #60a5fa; 
+  font-family: 'JetBrains Mono', 'Fira Code', monospace; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+.invite-copy-btn { 
+  padding: 8px 16px; 
+  border-radius: 8px; 
+  border: none; 
+  background: rgba(255, 255, 255, 0.08); 
+  color: #fff; 
+  font-size: 13px; 
+  font-weight: 600; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.invite-copy-btn:hover { background: rgba(255, 255, 255, 0.15); }
+.invite-copy-btn--copied { background: #3da85e !important; color: #fff; }
+
+/* ─── Mobile Responsiveness ─── */
+@media (max-width: 480px) {
+  .workspace-info-header {
+    padding: 32px 20px 24px;
+  }
+  .workspace-info-header h2 {
+    font-size: 22px;
+  }
+  .workspace-info-body {
+    padding: 24px 20px;
+  }
+  .workspace-info-body h3 {
+    font-size: 11px;
+    margin-bottom: 14px;
+  }
+  .workspace-member-item {
+    padding: 8px 10px;
+  }
+  .workspace-member-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+}

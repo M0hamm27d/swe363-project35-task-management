@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&display=swap');
+
+.urgensee-logo {
+  display: inline-flex;
+  align-items: baseline;
+  user-select: none;
+  font-family: 'Outfit', sans-serif;
+  color: #94a3b8;
+  line-height: x-height;
+  /* Using font metrics */
+}
+
+.logo-urgen {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.logo-see {
+  display: flex;
+  align-items: baseline;
+  margin-left: 2px;
+}
+
+.letter-s {
+  font-weight: 600;
+  color: #ef4444;
+}
+
+/* ─── Structural Eye 'e' ─── */
+.letter-eye {
+  position: relative;
+  display: inline-block;
+  /* lock dimensions to font x-height */
+  width: 0.62em;
+  height: 0.62em;
+  margin: 0 1px;
+  vertical-align: baseline;
+}
+
+/* The outer loop of the 'e' (The Master 3/4 Circle) */
+.eye-loop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 0.1em solid currentColor;
+  /* Relative bold stroke to match weight 600 'S' */
+  border-radius: 50%;
+  border-bottom-color: transparent;
+  transform: rotate(-35deg);
+  /* standard 'e' character tilt */
+}
+
+
+.letter-eye--priority {
+  color: #f97316;
+  /* Orange */
+}
+
+.letter-eye--safety {
+  color: #10b981;
+  /* Green */
+}
+
+/* The centered colored pupil dot (follows parent balance) */
+.eye-pupil {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(calc(-50% + var(--pupil-x, 0px)), calc(-50% + var(--pupil-y, 0px)));
+  width: 25%;
+  height: 25%;
+  background-color: currentColor;
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow: 0 0 6px currentColor;
+
+  /* I'm keeping the gaze frozen during the logout sequence */
+}
+
+/* Lashes follow the loop arc */
+.eye-lashes {
+  position: absolute;
+  top: -15%;
+  /* positioned relative to loop top */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 20%;
+  display: flex;
+  justify-content: center;
+  gap: 20%;
+  z-index: 3;
+}
+
+.eye-lashes::before,
+.eye-lashes::after {
+  content: '';
+  width: 1.5px;
+  /* (Lash thickness) */
+  height: 60%;
+  background-color: currentColor;
+  /* (Match loop color) */
+  border-radius: 1px;
+}
+
+.eye-lashes::before {
+  transform: rotate(-10deg);
+}
+
+.eye-lashes::after {
+  transform: rotate(10deg);
+}
+
+
+@keyframes logoGaze {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+
+  50% {
+    transform: translate(-70%, -50%);
+  }
+}
+
+/* Global sizing - Significantly increased for high-impact presence */
+.urgensee-logo--small {
+  font-size: 1.25rem;
+}
+
+.urgensee-logo--medium {
+  font-size: 3rem;
+}
+
+/* Enhanced for Login/Signup cards */
+.urgensee-logo--large {
+  font-size: 4.5rem;
+}
+
+.urgensee-logo--xl {
+  font-size: 6.5rem;
+}
+
+/* Definitive Landing Page size */
+
+.sidebar .urgensee-logo {
+  font-size: 1.5rem;
+  /* Balanced sidebar presence */
+}
