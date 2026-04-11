@@ -30,7 +30,7 @@ function AdminLayout() {
       <aside
         style={{
           width: "290px",
-          background: "#f5f5f5",
+          background: "#f5f5f5", 
           borderRight: "1px solid #d9d9d9",
           padding: "34px 22px",
         }}
