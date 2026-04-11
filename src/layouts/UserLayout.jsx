@@ -1,7 +1,7 @@
 import { Link, Outlet } from "react-router-dom";
 
 function UserLayout() {
-  return (
+  return ( 
     <div style={{ display: "flex", height: "100vh" }}>
       <div style={{ width: "220px", background: "#222", color: "#fff", padding: "20px" }}>
         <h3>User</h3>
