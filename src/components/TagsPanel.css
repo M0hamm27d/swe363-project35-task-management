@@ -1,0 +1,439 @@
+/* ─── Panel Shell ─────────────────────────────────────────────────────────── */
+.tags-panel {
+  background: #0d1526;
+  border: 1px solid #1a2a4a;
+  border-radius: 14px;
+  padding: 16px;
+  width: 240px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+/* ─── Panel Header ────────────────────────────────────────────────────────── */
+.tags-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tags-panel__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #5070b0;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* + Add new tag button in the header */
+.tags-panel__add-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: #5070b0;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.tags-panel__add-btn:hover {
+  background: rgba(79, 142, 247, 0.15);
+  border-color: rgba(79, 142, 247, 0.4);
+  color: #4f8ef7;
+  transform: rotate(90deg);
+}
+
+/* ─── Tag List ────────────────────────────────────────────────────────────── */
+.tags-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tags-panel__empty {
+  font-size: 13px;
+  color: #3d5080;
+  padding: 8px 0;
+}
+
+/* ─── Tag Row (chip + ⋮ button) ───────────────────────────────────────────── */
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;  /* needed for the ⋮ dropdown */
+}
+
+.tag-row__menu-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* ─── Tag Chip ────────────────────────────────────────────────────────────── */
+.tag-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #7090c0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.tag-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Active = this tag is filtering the grid */
+.tag-chip--active {
+  box-shadow: 0 0 0 2px rgba(79, 142, 247, 0.4);
+}
+
+/* Small colored dot inside the chip */
+.tag-chip__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tag-chip__name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Task count badge */
+.tag-chip__count {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #5070b0;
+  padding: 1px 6px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+/* ─── ⋮ Three-dot button ──────────────────────────────────────────────────── */
+.tag-row__menu-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #5070b0;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+  padding: 0;
+}
+
+.tag-row__menu-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #a0b8e0;
+}
+
+/* ─── ⋮ Dropdown ──────────────────────────────────────────────────────────── */
+.tag-dropdown {
+  position: absolute;
+  right: 0;
+  top: 30px;
+  background: #0f1e38;
+  border: 1px solid #1a2a4a;
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 200;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  min-width: 110px;
+  animation: fadeIn 0.12s ease;
+}
+
+.tag-dropdown__item {
+  display: block;
+  width: 100%;
+  padding: 9px 14px;
+  background: transparent;
+  border: none;
+  color: #a0b8d8;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.tag-dropdown__item:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.tag-dropdown__item--danger {
+  color: #f87171;
+}
+
+.tag-dropdown__item--danger:hover {
+  background: rgba(248, 113, 113, 0.08);
+}
+
+/* Label row with name + X/20 count on the right */
+.tag-edit-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tag-edit-count {
+  font-size: 10px;
+  color: #3d5080;
+  font-weight: 600;
+}
+
+/* Hint shown when color limit is reached */
+.tag-edit-hint {
+  font-size: 11px;
+  color: #3d5080;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ─── Edit Form ───────────────────────────────────────────────────────────── */
+.tag-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tag-edit-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #5070b0;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.tag-edit-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid #1a2a4a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e0e8ff;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.tag-edit-input:focus {
+  border-color: #1e4db7;
+}
+
+.tag-edit-input--error {
+  border-color: #f87171;
+}
+
+.tag-edit-error {
+  font-size: 11px;
+  color: #f87171;
+  margin: 0;
+}
+
+/* Color error sits between the label row and the palette */
+.tag-edit-error--color {
+  margin-bottom: 2px;
+}
+
+/* ─── Color Picker ────────────────────────────────────────────────────────── */
+.color-picker {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+/* Each color circle sits in a wrapper that enables the × button overlay */
+.color-circle-wrapper {
+  position: relative;
+  width: 30px;
+  height: 30px;
+}
+
+/* The clickable color circle */
+.color-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  outline: none;
+  display: block;
+  padding: 0;
+}
+
+.color-circle:hover {
+  transform: scale(1.12);
+}
+
+.color-circle--selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+  transform: scale(1.1);
+}
+
+/* × delete button — floats top-right of the circle, hidden by default */
+.color-circle-delete {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #0d1526;
+  border: 1px solid #3a5080;
+  color: #c0d0e8;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: none;               /* hidden by default */
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* Show × only when hovering the wrapper */
+.color-circle-wrapper:hover .color-circle-delete {
+  display: flex;
+}
+
+.color-circle-delete:hover {
+  background: #f87171;
+  color: #0a0f1e;
+  border-color: #f87171;
+}
+
+/* Wrapper for the + button and hidden input */
+.color-circle-add-wrapper {
+  position: relative;
+  width: 30px;
+  height: 30px;
+}
+
+.color-picker-hidden {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* Dashed "+" circle visual beneath the input */
+.color-circle-add {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  z-index: 1;
+  pointer-events: none; /* Let clicks pass to the input above */
+}
+
+/* Hover effects applied when hovering the wrapper */
+.color-circle-add-wrapper:hover .color-circle-add {
+  border-color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.8);
+  transform: scale(1.08);
+}
+
+/* ─── Preview Chip ────────────────────────────────────────────────────────── */
+.tag-edit-preview {
+  display: flex;
+  align-items: center;
+}
+
+.tag-chip-preview {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1.5px solid transparent;
+}
+
+/* ─── Edit Action Buttons ─────────────────────────────────────────────────── */
+.tag-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tag-edit-btn {
+  flex: 1;
+  padding: 9px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.tag-edit-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.tag-edit-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.tag-edit-btn--confirm {
+  background: #1e4db7;
+  color: #e0eeff;
+}
+
+.tag-edit-btn--cancel {
+  background: rgba(255, 255, 255, 0.07);
+  color: #7090b0;
+}
+
+/* ─── Shared Animation ────────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
