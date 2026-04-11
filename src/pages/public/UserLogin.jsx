@@ -72,7 +72,7 @@ function UserLogin() {
             <UserIcon />
           </div>
           <Logo size="medium" isPrivacyMode={isPasswordFocused && !showPassword} />
-          <h2 className="welcome-msg">Welcome User</h2>
+          <h2 className="welcome-msg">Welcome, User</h2>
         </header>
 
         {/* Login Form */}
