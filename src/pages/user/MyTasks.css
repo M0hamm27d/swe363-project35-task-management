@@ -1,0 +1,74 @@
+/* Specific styles for MyTasks page (most are now inherited from index.css) */
+
+.my-tasks__count {
+  background: rgba(79, 142, 247, 0.15);
+  color: #4f8ef7;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.my-tasks__clear-btn {
+  background: transparent;
+  border: none;
+  color: #7090c0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.my-tasks__clear-btn:hover {
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+}
+
+.my-tasks__section-title--completed {
+  color: #3d5080;
+}
+
+.my-tasks__empty {
+  color: #3d5080;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 20px 0;
+}
+
+/* Active Tag Indicator Bar */
+.active-tag-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: #5070b0;
+  font-weight: 500;
+}
+
+.active-tag-chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 20px;
+}
+
+.active-tag-clear {
+  background: transparent;
+  border: none;
+  color: #5070b0;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.active-tag-clear:hover {
+  color: #f87171;
+}
