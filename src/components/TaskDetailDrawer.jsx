@@ -51,9 +51,9 @@ function formatTimeOnly(isoString) {
 //   onSave   — (taskId, updatedFields) => void   [edit]
 //   onCreate — (newTaskFields) => void            [create]
 //   onClose  — () => void
-function TaskDetailDrawer({ mode = 'edit', task, tags, onSave, onCreate, onClose }) {
+function TaskDetailDrawer({ mode = 'edit', task, tags, onSave, onCreate, onClose, canEdit = true, showVisibility = true }) {
   const isCreate = mode === 'create';
-  const isView   = mode === 'view';
+  const isView   = mode === 'view' || (!isCreate && !canEdit);
 
   const [title,       setTitle]       = useState(isCreate ? '' : task.title);
   const [description, setDescription] = useState(isCreate ? '' : (task.description    ?? ''));
@@ -61,6 +61,7 @@ function TaskDetailDrawer({ mode = 'edit', task, tags, onSave, onCreate, onClose
   const [deadline,    setDeadline]    = useState(isCreate ? '' : (task?.deadline?.slice(0,16) || ''));
   const [progress,    setProgress]    = useState(isCreate ? 0 : (task.progress          ?? 0));
   const [tagName,     setTagName]     = useState(isCreate ? '' : (task.tag?.name        ?? ''));
+  const [isVisible,   setIsVisible]   = useState(isCreate ? true : (task.isVisible      ?? true));
 
   const [estDays,    setEstDays]    = useState(() => parseDuration(isCreate ? null : task?.estimatedFinish).days);
   const [estHours,   setEstHours]   = useState(() => parseDuration(isCreate ? null : task?.estimatedFinish).hours);
@@ -83,6 +84,7 @@ function TaskDetailDrawer({ mode = 'edit', task, tags, onSave, onCreate, onClose
     setDeadline(task.deadline?.slice(0,16) || '');
     setProgress(task.progress        ?? 0);
     setTagName(task.tag?.name        ?? '');
+    setIsVisible(task.isVisible      ?? true);
     setTitleError(''); setDescError(''); setStartError(''); setDeadlineError('');
     const dur = parseDuration(task.estimatedFinish);
     setEstDays(dur.days); setEstHours(dur.hours); setEstMinutes(dur.minutes);
@@ -137,6 +139,7 @@ function TaskDetailDrawer({ mode = 'edit', task, tags, onSave, onCreate, onClose
       estimatedFinish: { days: Number(estDays), hours: Number(estHours), minutes: Number(estMinutes) },
       progress: Number(progress),
       tag: selectedTag,
+      isVisible,
       completed: false,
     };
 
@@ -237,6 +240,45 @@ function TaskDetailDrawer({ mode = 'edit', task, tags, onSave, onCreate, onClose
               {tags.map((t) => <option key={t.name} value={t.name}>{t.name}</option>)}
             </select>
           </div>
+
+          {/* Visibility Toggle */}
+          {showVisibility && (
+            <div className="drawer-field">
+              <div className={`drawer-visibility-card ${!isVisible ? 'drawer-visibility-card--hidden' : ''} ${isView ? 'drawer-visibility-card--disabled' : ''}`}>
+                <div className="drawer-visibility-info">
+                  <div className="drawer-visibility-icon-box">
+                    {isVisible ? (
+                      <svg className="drawer-visibility-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    ) : (
+                      <svg className="drawer-visibility-svg drawer-visibility-svg--off" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="drawer-visibility-content">
+                    <label className="drawer-label drawer-label--nocaps" htmlFor="drawer-visible">
+                      Team Visibility
+                    </label>
+                    <p className="drawer-visibility-sub">{isVisible ? 'Visible to everyone' : 'Only visible to you'}</p>
+                  </div>
+                </div>
+                <label className="drawer-switch">
+                  <input
+                    id="drawer-visible"
+                    type="checkbox"
+                    checked={isVisible}
+                    onChange={(e) => setIsVisible(e.target.checked)}
+                    disabled={isView}
+                  />
+                  <span className="drawer-switch-slider"></span>
+                </label>
+              </div>
+            </div>
+          )}
 
           {/* Dates */}
           <div className="drawer-date-grid">

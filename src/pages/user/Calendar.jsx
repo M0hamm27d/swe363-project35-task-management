@@ -83,7 +83,7 @@ const ROW_MIN_HEIGHT = 44;
 
 export default function Calendar() {
   const { workspaces } = useWorkspaces();
-  const { tasks: allTasks, updateTask } = useTasks();
+  const { tasks: allTasks, tags, updateTask, addTag, editTag, deleteTag } = useTasks();
 
   // View states
   const [viewMode, setViewMode] = useState('monthOverview'); // 'monthOverview' | 'monthDetail' | 'week'
@@ -101,14 +101,15 @@ export default function Calendar() {
 
   // Derive tasks
   const tasksToRender = useMemo(() => {
-    // In actual implementation, we might filter by Source/Workspace.
-    // For now we use the main unified task dataset.
-    return allTasks;
+    if (source === 'myTasks') {
+      return allTasks.filter(t => t.workspaceId === 'personal' || !t.workspaceId);
+    } else {
+      return allTasks.filter(t => t.workspaceId === selectedWorkspaceId);
+    }
   }, [allTasks, source, selectedWorkspaceId]);
 
-  const uniqueTags = useMemo(() => {
-    return extractTags(tasksToRender);
-  }, [tasksToRender]);
+  const currentWorkspaceId = source === 'myTasks' ? 'personal' : selectedWorkspaceId;
+  const calendarTags = tags.filter(t => t.workspaceId === currentWorkspaceId);
 
   const [tagsOpen, setTagsOpen] = useState(false);
   const tagsBtnRef = useRef(null);
@@ -443,13 +444,13 @@ export default function Calendar() {
         <div className="tags-modal-overlay" onClick={() => setTagsOpen(false)}>
           <div className="tags-modal-box" ref={tagsPanelRef} onClick={(e) => e.stopPropagation()}>
             <TagsPanel
-              tags={uniqueTags}
+              tags={calendarTags}
               tasks={tasksToRender}
               selectedTag={selectedTag}
               onSelectTag={(tag) => setSelectedTag(tag)}
-              onEditTag={() => { }}
-              onDeleteTag={() => { }}
-              onAddTag={() => { }}
+              onEditTag={(oldName, updatedTag) => editTag(oldName, updatedTag, currentWorkspaceId)}
+              onDeleteTag={(tagName) => deleteTag(tagName, currentWorkspaceId)}
+              onAddTag={(tag) => addTag(tag, currentWorkspaceId)}
               selectionOnly={true}
             />
           </div>
@@ -497,7 +498,7 @@ export default function Calendar() {
         <TaskDetailDrawer
           mode="view"
           task={drawerTask}
-          tags={uniqueTags}
+          tags={tags}
           onSave={(taskId, fields) => {
             updateTask(taskId, fields);
             setDrawerTask(null);

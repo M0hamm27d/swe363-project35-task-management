@@ -8,18 +8,18 @@ import './MyTasks.css';
 
 // ─── MyTasks Component ────────────────────────────────────────────────────────
 function MyTasks() {
-  const { tasks, addTask, updateTask, deleteTask, toggleComplete, clearCompleted } = useTasks();
+  const { tasks, tags, addTask, updateTask, deleteTask, toggleComplete, clearCompleted, addTag, editTag, deleteTag } = useTasks();
 
   const [view, setView] = useState('inbox');
-  const [selectedTag, setSelectedTag] = useState(null);  // tag name | null
+  const [selectedTag, setSelectedTag] = useState(null);  // Tags are now managed via context, filtered for 'personal' scope
+  const personalTags = tags.filter(t => t.workspaceId === 'personal');
   const [tagsOpen, setTagsOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);  // task object | null
   const [isCreatingTask, setIsCreatingTask] = useState(false); // open drawer in 'create' mode
   const [isClearingCompleted, setIsClearingCompleted] = useState(false); // clear all modal
 
-  // Tags are derived from the central task list
-  const tags = extractTags(tasks);
+  // Tags are now managed via context
 
   // Ref used to close the tags panel when clicking outside of it
   const tagsBtnRef = useRef(null);
@@ -53,31 +53,22 @@ function MyTasks() {
     setIsClearingCompleted(false);
   }
 
-  // Tags edits now happen through task updates in context
-  function handleEditTag(oldName, { name, color }) {
-    tasks.forEach(t => {
-      if (t.tag?.name === oldName) {
-        updateTask(t.id, { tag: { name, color } });
-      }
-    });
-    if (selectedTag === oldName) setSelectedTag(name);
+  function handleEditTag(oldName, updatedTag) {
+    editTag(oldName, updatedTag, 'personal');
+    if (selectedTag === oldName) setSelectedTag(updatedTag.name);
   }
 
   function handleDeleteTag(tagName) {
-    tasks.forEach(t => {
-      if (t.tag?.name === tagName) {
-        updateTask(t.id, { tag: null });
-      }
-    });
+    deleteTag(tagName, 'personal');
     if (selectedTag === tagName) setSelectedTag(null);
   }
 
-  function handleAddTag({ name, color }) {
-    // New tags can be applied to tasks, so no independent tag state is needed
+  function handleAddTag(tag) {
+    addTag(tag, 'personal');
   }
 
   function handleCreateTask(newTaskFields) {
-    addTask(newTaskFields);
+    addTask({ ...newTaskFields, workspaceId: 'personal' });
   }
 
   function handleSaveTask(id, updatedFields) {
@@ -86,9 +77,10 @@ function MyTasks() {
 
   // ── Filtering pipeline: view → tag → split ──────────────────────────────────
   const viewFiltered = filterByView(tasks, view);
+  const personalTasks = viewFiltered.filter(t => t.workspaceId === 'personal' || !t.workspaceId);
   const tagFiltered = selectedTag
-    ? viewFiltered.filter((t) => t.tag?.name === selectedTag)
-    : viewFiltered;
+    ? personalTasks.filter((t) => t.tag?.name === selectedTag)
+    : personalTasks;
   const ongoing = tagFiltered.filter((t) => !t.completed);
   const completed = tagFiltered.filter((t) => t.completed);
 
@@ -162,8 +154,8 @@ function MyTasks() {
             onClick={(e) => e.stopPropagation()}
           >
             <TagsPanel
-              tags={tags}
-              tasks={tasks}
+              tags={personalTags}
+              tasks={personalTasks}
               selectedTag={selectedTag}
               onSelectTag={(tag) => { setSelectedTag(tag); }}
               onEditTag={handleEditTag}
@@ -180,8 +172,8 @@ function MyTasks() {
           <span
             className="active-tag-chip"
             style={{
-              background: `${tags.find((t) => t.name === selectedTag)?.color ?? '#888'}30`,
-              color: tags.find((t) => t.name === selectedTag)?.color ?? '#888',
+              background: `${personalTags.find((t) => t.name === selectedTag)?.color ?? '#888'}30`,
+              color: personalTags.find((t) => t.name === selectedTag)?.color ?? '#888',
             }}
           >
             {selectedTag}
@@ -284,7 +276,8 @@ function MyTasks() {
         <TaskDetailDrawer
           mode={isCreatingTask ? 'create' : 'edit'}
           task={selectedTask || undefined}
-          tags={tags}
+          tags={personalTags}
+          showVisibility={false}
           onSave={handleSaveTask}
           onCreate={handleCreateTask}
           onClose={() => {

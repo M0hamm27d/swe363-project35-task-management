@@ -426,6 +426,11 @@
   box-shadow: 0 0 20px rgba(58, 144, 200, 0.3);
 }
 
+.heatmap-step-4 {
+  background: rgba(30, 77, 183, 0.95);
+  box-shadow: 0 0 25px rgba(30, 77, 183, 0.4);
+}
+
 /* ─── Week View ─── */
 .cal-week-view {
   overflow: hidden;

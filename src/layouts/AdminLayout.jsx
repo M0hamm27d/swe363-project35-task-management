@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import Logo from "../components/Logo";
 import Footer from "../components/Footer";
@@ -75,11 +75,19 @@ function AdminLayout() {
 
   return (
     <div className="admin-layout">
-      {!sidebarOpen && (
-        <button className="hamburger-btn" onClick={() => setSidebarOpen(true)} aria-label="Open admin navigation">
+      <header className="admin-mobile-header">
+        <button 
+          className="hamburger-btn" 
+          onClick={() => setSidebarOpen(true)} 
+          aria-label="Open admin navigation"
+          aria-expanded={sidebarOpen}
+        >
           {Icons.menu}
         </button>
-      )}
+        <div className="admin-mobile-logo">
+          <Logo size="small" />
+        </div>
+      </header>
 
       {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar} aria-hidden="true" />}
 

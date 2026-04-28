@@ -40,7 +40,7 @@ function UserManagement() {
       banned: false,
     },
     {
-      id: "202219282",
+      id: "202219999", // Fixed duplicate ID
       name: "Yzead Bickle",
       email: "Bickle323@gmail.com",
       date: "04/02/2021",
@@ -56,6 +56,7 @@ function UserManagement() {
     workAs: "Regular user",
   });
 
+  const [selectedIds, setSelectedIds] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const roles = ["Regular user", "Team leader", "Admin"];
 
@@ -75,9 +76,23 @@ function UserManagement() {
     );
   };
 
-  const addUser = () => {
-    if (!newUser.name || !newUser.email) return;
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) 
+        ? prev.filter(item => item !== id) 
+        : [...prev, id]
+    );
+  };
 
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredUsers.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredUsers.map(u => u.id));
+    }
+  };
+
+  const addUser = () => {
     const item = {
       id: Date.now().toString(),
       name: newUser.name,
@@ -102,11 +117,21 @@ function UserManagement() {
   };
 
   const exportUsersAsCSV = () => {
+    // If IDs are selected, export only those. Otherwise, export everything in the current filter.
+    const usersToExport = selectedIds.length > 0 
+      ? users.filter(u => selectedIds.includes(u.id))
+      : filteredUsers;
+
+    if (usersToExport.length === 0) {
+      alert("No users to export.");
+      return;
+    }
+
     // Create CSV header
-    const headers = ["ID", "Name", "Email", "Date of Login", "Status", "Work As", "Status"];
+    const headers = ["ID", "Name", "Email", "Date of Login", "Status", "Work As", "Account Status"];
     
     // Create CSV rows
-    const rows = filteredUsers.map(user => [
+    const rows = usersToExport.map(user => [
       user.id,
       user.name,
       user.email,
@@ -141,7 +166,13 @@ function UserManagement() {
       <h1 className="admin-page-title">User Management</h1>
 
       <div className="admin-panel">
-        <div className="admin-action-bar">
+        <form 
+          className="admin-action-bar" 
+          onSubmit={(e) => {
+            e.preventDefault();
+            addUser();
+          }}
+        >
           <div className="admin-field-group">
             <input
               type="text"
@@ -149,6 +180,7 @@ function UserManagement() {
               value={newUser.name}
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
               className="admin-input"
+              required
             />
           </div>
           <div className="admin-field-group">
@@ -158,6 +190,7 @@ function UserManagement() {
               value={newUser.email}
               onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
               className="admin-input"
+              required
             />
           </div>
           <div className="admin-field-group">
@@ -192,10 +225,10 @@ function UserManagement() {
               )}
             </div>
           </div>
-          <button onClick={addUser} className="admin-btn admin-btn--primary">
+          <button type="submit" className="admin-btn admin-btn--primary">
             Add user
           </button>
-        </div>
+        </form>
 
         <div className="admin-action-bar">
           <input
@@ -207,7 +240,7 @@ function UserManagement() {
             style={{ maxWidth: 240 }}
           />
           <button onClick={exportUsersAsCSV} className="admin-btn admin-btn--secondary">
-            Export to PDF
+            {selectedIds.length > 0 ? `Export Selected (${selectedIds.length})` : "Export All to CSV"}
           </button>
         </div>
 
@@ -215,7 +248,16 @@ function UserManagement() {
           <table className="admin-table">
             <thead>
               <tr>
-                <th></th>
+                <th>
+                  <label className="admin-checkbox-container">
+                    <input 
+                      type="checkbox" 
+                      onChange={toggleSelectAll}
+                      checked={selectedIds.length === filteredUsers.length && filteredUsers.length > 0}
+                    />
+                    <span className="admin-checkmark"></span>
+                  </label>
+                </th>
                 <th>Name</th>
                 <th>E-mail</th>
                 <th>Date of log in</th>
@@ -227,17 +269,21 @@ function UserManagement() {
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
-                <tr key={user.id}>
-                  <td>
+                <tr key={user.id} className={selectedIds.includes(user.id) ? "admin-table-row--selected" : ""}>
+                  <td data-label="Select">
                     <label className="admin-checkbox-container">
-                      <input type="checkbox" />
+                      <input 
+                        type="checkbox" 
+                        checked={selectedIds.includes(user.id)}
+                        onChange={() => toggleSelect(user.id)}
+                      />
                       <span className="admin-checkmark"></span>
                     </label>
                   </td>
-                  <td>{user.name}</td>
-                  <td style={{ color: "#4f8ef7" }}>{user.email}</td>
-                  <td>{user.date}</td>
-                  <td>
+                  <td data-label="Name">{user.name}</td>
+                  <td data-label="E-mail" style={{ color: "#4f8ef7", wordBreak: 'break-all' }}>{user.email}</td>
+                  <td data-label="Date">{user.date}</td>
+                  <td data-label="Statistics">
                     <div className="admin-status-bar">
                       <div className="admin-status-track">
                         <div
@@ -254,16 +300,17 @@ function UserManagement() {
                       <span>{user.status}</span>
                     </div>
                   </td>
-                  <td>{user.id}</td>
-                  <td>
+                  <td data-label="ID">{user.id}</td>
+                  <td data-label="Role">
                     <span className={`admin-role-badge ${getRoleBadgeClass(user.workAs)}`}>
                       {user.workAs}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Action">
                     <button
                       onClick={() => toggleBan(user.id)}
                       className={`admin-btn ${user.banned ? "admin-btn--secondary" : "admin-btn--danger"}`}
+                      style={{ marginTop: 0, width: 'auto' }}
                     >
                       {user.banned ? "Unban" : "Ban"}
                     </button>

@@ -19,6 +19,8 @@ const mockTasks = [
     estimatedFinish: { days: 0, hours: 3, minutes: 30 },
     progress: 80,
     completed: false,
+    isVisible: true,
+    workspaceId: "personal",
   },
   {
     id: 2,
@@ -31,6 +33,8 @@ const mockTasks = [
     estimatedFinish: { days: 1, hours: 2, minutes: 0 },
     progress: 45,
     completed: false,
+    isVisible: true,
+    workspaceId: "personal",
   },
   {
     id: 3,
@@ -43,6 +47,8 @@ const mockTasks = [
     estimatedFinish: { days: 5, hours: 0, minutes: 0 },
     progress: 20,
     completed: false,
+    isVisible: true,
+    workspaceId: "personal",
   },
   {
     id: 4,
@@ -55,6 +61,8 @@ const mockTasks = [
     estimatedFinish: { days: 0, hours: 0, minutes: 45 },
     progress: 100,
     completed: false,
+    isVisible: true,
+    workspaceId: "personal",
   },
   {
     id: 5,
@@ -67,6 +75,8 @@ const mockTasks = [
     estimatedFinish: { days: 3, hours: 0, minutes: 0 },
     progress: 0,
     completed: false,
+    isVisible: true,
+    workspaceId: "marketing",
   },
   {
     id: 6,
@@ -79,6 +89,8 @@ const mockTasks = [
     estimatedFinish: { days: 0, hours: 5, minutes: 0 },
     progress: 90,
     completed: false,
+    isVisible: true,
+    workspaceId: "dev",
   },
   {
     id: 7,
@@ -91,6 +103,8 @@ const mockTasks = [
     estimatedFinish: { days: 7, hours: 0, minutes: 0 },
     progress: 30,
     completed: false,
+    isVisible: true,
+    workspaceId: "dev",
   },
   {
     id: 8,
@@ -103,6 +117,8 @@ const mockTasks = [
     estimatedFinish: { days: 1, hours: 6, minutes: 30 },
     progress: 10,
     completed: false,
+    isVisible: true,
+    workspaceId: "marketing",
   },
 ];
 

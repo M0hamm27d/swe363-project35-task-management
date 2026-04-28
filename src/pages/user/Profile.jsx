@@ -32,7 +32,7 @@ function Profile() {
   // (Logout Animation Logic)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  
+
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
@@ -147,6 +147,11 @@ function Profile() {
             </div>
           </div>
 
+          <div className="input-group">
+            <label className="input-label" htmlFor="userId">ID</label>
+            <input id="userId" className="signup-input" value="USR-9921-X" readOnly style={{ background: 'rgba(255,255,255,0.02)', color: '#8ab4f8', cursor: 'default' }} />
+          </div>
+
           {error && <div className="signup-error">{error}</div>}
 
           <div className="profile-actions">
@@ -183,14 +188,14 @@ function Profile() {
             <p>Are you sure you want to log out of your account? Any unsaved progress will be lost.</p>
             <div className="modal-buttons">
               {/* (Logout Animation Logic) */}
-              <button className="confirm-yes confirm-logout" onClick={() => { 
+              <button className="confirm-yes confirm-logout" onClick={() => {
                 setShowLogoutConfirm(false);
                 setIsLoggingOut(true);
                 // I'm adding a 2.5s delay to let the sleepy eye animation finish before we redirect
                 setTimeout(() => {
-                  logout(); 
-                  navigate('/'); 
-                }, 2500); 
+                  logout();
+                  navigate('/');
+                }, 2500);
               }}>Yes, Log Out</button>
               <button className="confirm-no" onClick={() => setShowLogoutConfirm(false)}>Stay Signed In</button>
             </div>

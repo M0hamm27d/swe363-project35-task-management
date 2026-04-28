@@ -136,6 +136,11 @@ function AdminProfile() {
             </div>
           </div>
 
+          <div className="input-group">
+            <label className="input-label" htmlFor="adminId">ID</label>
+            <input id="adminId" className="signup-input" value="ADM-1022-Z" readOnly style={{ background: 'rgba(255,255,255,0.02)', color: '#8ab4f8', cursor: 'default' }} />
+          </div>
+
           {error && <div className="signup-error">{error}</div>}
 
           <div className="profile-actions">

@@ -51,7 +51,7 @@ function calcRemaining(est, progress) {
 //   onToggleComplete — marks task done / undoes it
 //   onDelete         — triggers the delete confirmation in the parent
 
-function TaskCard({ task, allTasks = [], onClick, onToggleComplete, onDelete }) {
+function TaskCard({ task, allTasks = [], onClick, onToggleComplete, onDelete, canEdit = true }) {
   const { title, tag, status, deadline, progress, completed, estimatedFinish } = task;
   
   // Apply the python-derived urgency algorithm
@@ -94,14 +94,16 @@ function TaskCard({ task, allTasks = [], onClick, onToggleComplete, onDelete }) 
           ></div>
 
           {/* X delete button — stopPropagation prevents the card click from firing */}
-          <button
-            className="task-card__delete-btn"
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            aria-label="Delete task"
-            title="Delete task"
-          >
-            ×
-          </button>
+          {canEdit && (
+            <button
+              className="task-card__delete-btn"
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              aria-label="Delete task"
+              title="Delete task"
+            >
+              ×
+            </button>
+          )}
         </div>
       </div>
 
@@ -140,17 +142,21 @@ function TaskCard({ task, allTasks = [], onClick, onToggleComplete, onDelete }) 
         The checkbox circle fills green when completed.
       */}
       <div className="task-card__footer">
-        <button
-          className={`task-card__check-btn ${completed ? 'task-card__check-btn--checked' : ''}`}
-          onClick={(e) => { e.stopPropagation(); onToggleComplete(); }}
-          aria-label={completed ? 'Mark as ongoing' : 'Mark as complete'}
-          title={completed ? 'Undo completion' : 'Mark as complete'}
-        >
-          {completed && '✓'}
-        </button>
-        <span className="task-card__check-label">
-          {completed ? 'Completed' : 'Mark done'}
-        </span>
+        {canEdit && (
+          <>
+            <button
+              className={`task-card__check-btn ${completed ? 'task-card__check-btn--checked' : ''}`}
+              onClick={(e) => { e.stopPropagation(); onToggleComplete(); }}
+              aria-label={completed ? 'Mark as ongoing' : 'Mark as complete'}
+              title={completed ? 'Undo completion' : 'Mark as complete'}
+            >
+              {completed && '✓'}
+            </button>
+            <span className="task-card__check-label">
+              {completed ? 'Completed' : 'Mark done'}
+            </span>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import mockTasks from '../data/mockTasks';
+import { extractTags } from '../utils/taskHelpers';
 
 const TasksContext = createContext();
 
@@ -9,9 +10,60 @@ export function TasksProvider({ children }) {
     mockTasks.map((t) => ({ ...t, completed: t.progress === 100 || t.completed }))
   );
 
+  const [tags, setTags] = useState(() => {
+    const seen = new Set();
+    const result = [];
+    tasks.forEach(t => {
+      if (t.tag) {
+        const key = `${t.tag.name}-${t.workspaceId || 'personal'}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          result.push({ ...t.tag, workspaceId: t.workspaceId || 'personal' });
+        }
+      }
+    });
+    return result;
+  });
+
+  const addTag = (tag, workspaceId) => {
+    setTags((prev) => {
+      if (prev.some((t) => t.name.toLowerCase() === tag.name.toLowerCase() && t.workspaceId === workspaceId)) return prev;
+      return [...prev, { ...tag, workspaceId }];
+    });
+  };
+
+  const editTag = (oldName, updatedTag, workspaceId) => {
+    // 1. Update the tags list
+    setTags((prev) =>
+      prev.map((t) => (t.name === oldName && t.workspaceId === workspaceId ? { ...updatedTag, workspaceId } : t))
+    );
+    // 2. Update all tasks using this tag in this workspace
+    setTasks((prev) =>
+      prev.map((t) =>
+        (t.tag?.name === oldName && t.workspaceId === workspaceId) ? { ...t, tag: updatedTag } : t
+      )
+    );
+  };
+
+  const deleteTag = (tagName, workspaceId) => {
+    // 1. Remove from tags list
+    setTags((prev) => prev.filter((t) => !(t.name === tagName && t.workspaceId === workspaceId)));
+    // 2. Clear from all tasks using this tag in this workspace
+    setTasks((prev) =>
+      prev.map((t) =>
+        (t.tag?.name === tagName && t.workspaceId === workspaceId) ? { ...t, tag: null } : t
+      )
+    );
+  };
+
   const addTask = (newTaskFields) => {
     const newId = (tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) : 0) + 1;
-    const newTask = { id: newId, ...newTaskFields };
+    const newTask = { 
+      id: newId, 
+      isVisible: true,
+      workspaceId: null, // default
+      ...newTaskFields 
+    };
     setTasks((prev) => [newTask, ...prev]);
     return newTask;
   };
@@ -39,11 +91,15 @@ export function TasksProvider({ children }) {
   return (
     <TasksContext.Provider value={{
       tasks,
+      tags,
       addTask,
       updateTask,
       deleteTask,
       toggleComplete,
       clearCompleted,
+      addTag,
+      editTag,
+      deleteTag,
     }}>
       {children}
     </TasksContext.Provider>

@@ -65,16 +65,20 @@ function UserLayout() {
 
   return (
     <div className="user-layout">
-      {!sidebarOpen && (
+      <header className="user-mobile-header">
         <button
           id="hamburger-btn"
           className="hamburger-btn"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open navigation menu"
+          aria-expanded={sidebarOpen}
         >
           {Icons.menu}
         </button>
-      )}
+        <div className="user-mobile-logo">
+          <Logo size="small" />
+        </div>
+      </header>
 
       {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar} aria-hidden="true" />}
 

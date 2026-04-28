@@ -14,7 +14,7 @@ function WorkspaceBoard() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { workspaces, setWorkspaces } = useWorkspaces();
-  const { tasks, addTask, updateTask, deleteTask, toggleComplete, clearCompleted } = useTasks();
+  const { tasks, tags, addTask, updateTask, deleteTask, toggleComplete, clearCompleted, addTag, editTag, deleteTag } = useTasks();
 
   const workspace = workspaces.find(ws => ws.id === id);
   const isLeader = workspace && workspace.members[0] === "You";
@@ -39,8 +39,8 @@ function WorkspaceBoard() {
 
   const inviteLink = `${window.location.origin}/join?workspace=${id}&token=${inviteToken}`;
 
-  // Tags are derived from the central task list
-  const tags = extractTags(tasks);
+  // Tags are now managed via context, filtered for this workspace
+  const workspaceTags = tags.filter(t => t.workspaceId === id);
 
   // Ref used to close the tags panel when clicking outside of it
   const tagsBtnRef = useRef(null);
@@ -74,28 +74,22 @@ function WorkspaceBoard() {
     setIsClearingCompleted(false);
   }
 
-  function handleEditTag(oldName, { name, color }) {
-    tasks.forEach(t => {
-      if (t.tag?.name === oldName) {
-        updateTask(t.id, { tag: { name, color } });
-      }
-    });
-    if (selectedTag === oldName) setSelectedTag(name);
+  function handleEditTag(oldName, updatedTag) {
+    editTag(oldName, updatedTag, id);
+    if (selectedTag === oldName) setSelectedTag(updatedTag.name);
   }
 
   function handleDeleteTag(tagName) {
-    tasks.forEach(t => {
-      if (t.tag?.name === tagName) {
-        updateTask(t.id, { tag: null });
-      }
-    });
+    deleteTag(tagName, id);
     if (selectedTag === tagName) setSelectedTag(null);
   }
 
-  function handleAddTag({ name, color }) { }
+  function handleAddTag(tag) {
+    addTag(tag, id);
+  }
 
   function handleCreateTask(newTaskFields) {
-    addTask(newTaskFields);
+    addTask({ ...newTaskFields, workspaceId: id });
   }
 
   function handleSaveTask(id, updatedFields) {
@@ -106,9 +100,16 @@ function WorkspaceBoard() {
   // Note: For workspace board, we should ideally only show tasks for THIS workspace.
   // Assuming 'id' is used to filter tasks (though mock data doesn't have workspace IDs yet)
   const viewFiltered = filterByView(tasks, view);
+  
+  // RBAC: Non-leaders only see visible tasks
+  const accessFiltered = isLeader 
+    ? viewFiltered.filter(t => t.workspaceId === id)
+    : viewFiltered.filter(t => t.workspaceId === id && t.isVisible !== false);
+
   const tagFiltered = selectedTag
-    ? viewFiltered.filter((t) => t.tag?.name === selectedTag)
-    : viewFiltered;
+    ? accessFiltered.filter((t) => t.tag?.name === selectedTag)
+    : accessFiltered;
+    
   const ongoing = tagFiltered.filter((t) => !t.completed);
   const completed = tagFiltered.filter((t) => t.completed);
 
@@ -118,6 +119,7 @@ function WorkspaceBoard() {
         key={task.id}
         task={task}
         allTasks={tasks}
+        canEdit={isLeader}
         onClick={() => setSelectedTask(task)}
         onToggleComplete={() => toggleComplete(task.id)}
         onDelete={() => setTaskToDelete(task.id)}
@@ -193,13 +195,14 @@ function WorkspaceBoard() {
             onClick={(e) => e.stopPropagation()}
           >
             <TagsPanel
-              tags={tags}
-              tasks={tasks}
+              tags={workspaceTags}
+              tasks={accessFiltered}
               selectedTag={selectedTag}
               onSelectTag={(tag) => { setSelectedTag(tag); }}
               onEditTag={handleEditTag}
               onDeleteTag={handleDeleteTag}
               onAddTag={handleAddTag}
+              selectionOnly={!isLeader}
             />
           </div>
         </div>
@@ -211,8 +214,8 @@ function WorkspaceBoard() {
           <span
             className="active-tag-chip"
             style={{
-              background: `${tags.find((t) => t.name === selectedTag)?.color ?? '#888'}30`,
-              color: tags.find((t) => t.name === selectedTag)?.color ?? '#888',
+              background: `${workspaceTags.find((t) => t.name === selectedTag)?.color ?? '#888'}30`,
+              color: workspaceTags.find((t) => t.name === selectedTag)?.color ?? '#888',
             }}
           >
             {selectedTag}
@@ -315,7 +318,9 @@ function WorkspaceBoard() {
         <TaskDetailDrawer
           mode={isCreatingTask ? 'create' : 'edit'}
           task={selectedTask || undefined}
-          tags={tags}
+          tags={workspaceTags}
+          canEdit={isLeader}
+          showVisibility={true}
           onSave={handleSaveTask}
           onCreate={handleCreateTask}
           onClose={() => {
@@ -325,14 +330,16 @@ function WorkspaceBoard() {
         />
       )}
 
-      <button
-        className="my-tasks__fab"
-        onClick={() => setIsCreatingTask(true)}
-        aria-label="Create new task"
-        title="Create new task"
-      >
-        +
-      </button>
+      {isLeader && (
+        <button
+          className="my-tasks__fab"
+          onClick={() => setIsCreatingTask(true)}
+          aria-label="Create new task"
+          title="Create new task"
+        >
+          +
+        </button>
+      )}
 
       {/* ── Workspace Info Modal ── */}
       {infoModalOpen && workspace && (
