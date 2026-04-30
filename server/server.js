@@ -4,6 +4,9 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const adminRoutes = require('./routes/adminRoutes');
 
+//auth routes
+const authRoutes = require('./routes/authRoutes');
+
 // Load environment variables
 dotenv.config();
 
@@ -16,18 +19,19 @@ app.use(express.json());
 
 app.use('/api/admin', adminRoutes);
 
+// 🔥 هذا الجديد (auth base path)
+app.use('/api/auth', authRoutes);
+
 // Basic Route for testing
 app.get('/', (req, res) => {
   res.send('Task Management API is running...');
 });
-
 
 const userRoutes = require('./routes/userRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 
 app.use('/api/users', userRoutes);
 app.use('/api/tasks', taskRoutes);
-
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI)
