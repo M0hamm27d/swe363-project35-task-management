@@ -4,7 +4,8 @@ const tagSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    maxlength: [30, 'Tag name cannot exceed 30 characters']
   },
   colorCode: {
     type: String,
