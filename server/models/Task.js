@@ -27,6 +27,17 @@ const taskSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  progress: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 100
+  },
+  estimatedFinish: {
+    days: { type: Number, default: 0 },
+    hours: { type: Number, default: 0 },
+    minutes: { type: Number, default: 0 }
+  },
   isVisible: {
     type: Boolean,
     default: true

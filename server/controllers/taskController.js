@@ -53,13 +53,17 @@ exports.createTask = async (req, res) => {
       }
     }
 
-    // If no workspaceId, it is a personal task (anyone can create their own)
+    // If the frontend sends a tag object { _id, name, color }, extract the ID
+    let tagId = req.body.tagId;
+    if (req.body.tag && req.body.tag._id) {
+      tagId = req.body.tag._id;
+    }
+
+    // If no workspaceId, it is a personal task
     const task = await Task.create({
-      title,
-      description,
+      ...req.body,
+      tag: tagId,
       workspaceId: workspaceId || null,
-      deadline,
-      estimatedTime,
       userId: req.user._id 
     });
 
@@ -92,6 +96,11 @@ exports.updateTask = async (req, res) => {
       if (!membership || membership.role !== 'Admin') {
         return res.status(403).json({ message: 'Only leaders can update workspace tasks.' });
       }
+    }
+
+    // If the frontend sends a tag object, extract the ID
+    if (req.body.tag && req.body.tag._id) {
+      req.body.tag = req.body.tag._id;
     }
 
     const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
