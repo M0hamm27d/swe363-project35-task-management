@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const GlobalSettings = require('../models/GlobalSettings');
 
 /**
  * @desc    Helper function to generate a JWT token
@@ -27,6 +28,12 @@ const createToken = (id, role) => {
 exports.registerUser = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
+
+    // CHECK GLOBAL SETTINGS: Is registration allowed?
+    const settings = await GlobalSettings.findOne();
+    if (settings && settings.allowUserRegistration === false) {
+      return res.status(403).json({ message: 'User registration is currently closed by the administrator.' });
+    }
 
     // 1. Check if the user email already exists in the database
     const userExists = await User.findOne({ email });

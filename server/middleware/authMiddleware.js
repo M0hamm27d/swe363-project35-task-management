@@ -31,6 +31,14 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ message: 'User not found' });
       }
 
+      // 4. Handle Maintenance Mode
+      const GlobalSettings = require('../models/GlobalSettings');
+      const settings = await GlobalSettings.findOne();
+      
+      if (settings && settings.maintenanceMode && req.user.role !== 'admin') {
+        return res.status(503).json({ message: 'System is currently under maintenance. Please try again later.' });
+      }
+
       next();
     } catch (error) {
       res.status(401).json({ message: 'Not authorized, token failed' });

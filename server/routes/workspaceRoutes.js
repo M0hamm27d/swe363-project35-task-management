@@ -12,10 +12,17 @@ router.route('/')
   .post(createWorkspace)
   .get(getWorkspaces);
 
+// URL: /api/workspaces/:id
+router.route('/:id')
+  .delete(disbandWorkspace);
+
+// URL: /api/workspaces/:id/leave
+router.delete('/:id/leave', leaveWorkspace);
+
 // URL: /api/workspaces/:id/members
 router.route('/:id/members')
   .post(addMember);
 
-router.delete('/:id/members/:userId', removeMember);
+router.delete('/:id/members/:userIdToRemove', removeMember);
 
 module.exports = router;
