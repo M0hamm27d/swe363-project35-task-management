@@ -51,30 +51,52 @@ function UserSignup() {
     return regex.test(pass);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError('');
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
 
-    const { firstName, lastName, email, password, confirmPassword } = formData;
+  const { firstName, lastName, email, password, confirmPassword } = formData;
 
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      setError('Please fill in all fields.');
+  if (!firstName || !lastName || !email || !password || !confirmPassword) {
+    setError('Please fill in all fields.');
+    return;
+  }
+
+  if (!validatePassword(password)) {
+    setError('Password must be at least 8 characters long and include a letter, a number, and a special character.');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    setError('Passwords do not match.');
+    return;
+  }
+
+  try {
+    const res = await fetch('http://localhost:5000/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ firstName, lastName, email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.message || 'Signup failed');
       return;
     }
 
-    if (!validatePassword(password)) {
-      setError('Password must be at least 8 characters long and include a letter, a number, and a special character.');
-      return;
-    }
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data));
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    login({ firstName, lastName, email });
+    login(data); 
     navigate('/my-tasks');
-  };
+  } catch (err) {
+    setError('Server error');
+  }
+};
 
   return (
     <div className="signup-page">

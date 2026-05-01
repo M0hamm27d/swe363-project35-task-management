@@ -39,23 +39,39 @@ function AdminLogin() {
     return pass.length >= 8;
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setError('');
+  const handleLogin = async (e) => {
+  e.preventDefault();
+  setError('');
 
-    if (!email || !password) {
-      setError('Please fill in all fields.');
+  if (!email || !password) {
+    setError('Please fill in all fields.');
+    return;
+  }
+
+  try {
+    const res = await fetch('http://localhost:5000/api/auth/admin/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.message || 'Login failed');
       return;
     }
 
-    if (!validatePassword(password)) {
-      setError('Invalid admin credentials format.');
-      return;
-    }
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data));
 
-    // Redirect to Admin Dashboard
     navigate('/admin');
-  };
+  } catch (err) {
+    setError('Server error');
+  }
+};
 
   return (
     <div className="login-page">

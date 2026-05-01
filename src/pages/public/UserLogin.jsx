@@ -38,22 +38,39 @@ function UserLogin() {
     return regex.test(pass);
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setError('');
+  const handleLogin = async (e) => {
+  e.preventDefault();
+  setError('');
 
-    if (!email || !password) {
-      setError('Please fill in all fields.');
+  if (!email || !password) {
+    setError('Please fill in all fields.');
+    return;
+  }
+
+  try {
+    const res = await fetch('http://localhost:5000/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.message || 'Login failed');
       return;
     }
 
-    if (!validatePassword(password)) {
-      setError('Password must be at least 8 characters long and include a letter, a number, and a special character.');
-      return;
-    }
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data));
 
     navigate('/my-tasks');
-  };
+  } catch (err) {
+    setError('Server error');
+  }
+};
 
   return (
     <div className="login-page">
