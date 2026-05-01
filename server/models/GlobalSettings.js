@@ -1,11 +1,24 @@
 const mongoose = require('mongoose');
 
 const globalSettingsSchema = new mongoose.Schema({
-  twitterUrl: String,
-  instagramUrl: String,
-  linkedInUrl: String,
+  maintenanceMode: {
+    type: Boolean,
+    default: false
+  },
+  allowUserRegistration: {
+    type: Boolean,
+    default: true
+  },
   contactPhone: String,
-  contactEmail: String,
+  contactEmail: {
+    type: String,
+    default: 'support@urgensee.com'
+  },
+  socialLinks: {
+    twitter: String,
+    linkedin: String,
+    instagram: String
+  },
   modifiedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Admin'
