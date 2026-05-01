@@ -1,6 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { createWorkspace, getWorkspaces, addMember } = require('../controllers/workspaceController');
+const { 
+  createWorkspace, 
+  getWorkspaces, 
+  addMember, 
+  removeMember, 
+  leaveWorkspace, 
+  disbandWorkspace 
+} = require('../controllers/workspaceController');
 const { protect, userOnly } = require('../middleware/authMiddleware');
 
 // All workspace routes are private and user-only

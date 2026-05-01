@@ -12,14 +12,14 @@ exports.createWorkspace = async (req, res) => {
     const workspace = await Workspace.create({
       name,
       description,
-      color: color || '#1e4db7',
-      ownerId: req.user._id
+      colorCode: color || '#1e4db7',
+      leaderId: req.user._id
     });
 
     await WorkspaceMember.create({
       workspaceId: workspace._id,
       userId: req.user._id,
-      role: 'Admin'
+      role: 'leader'
     });
 
     res.status(201).json(workspace);
@@ -49,7 +49,7 @@ exports.getWorkspaces = async (req, res) => {
         ...ws,
         members: allMembers.map(m => `${m.userId.firstName} ${m.userId.lastName}`),
         role: allMembers.find(m => m.userId._id.toString() === req.user._id.toString())?.role,
-        leader: allMembers.find(m => m.role === 'Admin')?.userId?.firstName // For the "Leader: Name" display
+        leader: allMembers.find(m => m.role === 'leader')?.userId?.firstName // For the "Leader: Name" display
       };
     }));
 
@@ -82,7 +82,7 @@ exports.disbandWorkspace = async (req, res) => {
     if (!workspace) return res.status(404).json({ message: 'Workspace not found' });
 
     // Only the owner/leader can disband
-    if (workspace.ownerId.toString() !== req.user._id.toString()) {
+    if (workspace.leaderId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Only the workspace owner can disband it.' });
     }
 
@@ -104,11 +104,11 @@ exports.addMember = async (req, res) => {
     const workspaceId = req.params.id;
 
     const requesterMembership = await WorkspaceMember.findOne({ workspaceId, userId: req.user._id });
-    if (!requesterMembership || requesterMembership.role !== 'Admin') {
+    if (!requesterMembership || requesterMembership.role !== 'leader') {
       return res.status(403).json({ message: 'Only leaders can add members' });
     }
 
-    await WorkspaceMember.create({ workspaceId, userId: userIdToAdd, role: role || 'Member' });
+    await WorkspaceMember.create({ workspaceId, userId: userIdToAdd, role: role || 'member' });
     res.status(201).json({ message: 'Member added' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -124,7 +124,7 @@ exports.removeMember = async (req, res) => {
     const workspaceId = req.params.id;
 
     const requesterMembership = await WorkspaceMember.findOne({ workspaceId, userId: req.user._id });
-    if (!requesterMembership || requesterMembership.role !== 'Admin') {
+    if (!requesterMembership || requesterMembership.role !== 'leader') {
       return res.status(403).json({ message: 'Only leaders can remove members' });
     }
 

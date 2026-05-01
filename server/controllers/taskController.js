@@ -48,7 +48,7 @@ exports.createTask = async (req, res) => {
     // If it's a WORKSPACE task, check if the user is a Leader
     if (workspaceId) {
       const membership = await WorkspaceMember.findOne({ workspaceId, userId: req.user._id });
-      if (!membership || membership.role !== 'Admin') {
+      if (!membership || membership.role !== 'leader') {
         return res.status(403).json({ message: 'Only team leaders can create tasks in a workspace.' });
       }
     }
@@ -93,7 +93,7 @@ exports.updateTask = async (req, res) => {
         workspaceId: task.workspaceId, 
         userId: req.user._id 
       });
-      if (!membership || membership.role !== 'Admin') {
+      if (!membership || membership.role !== 'leader') {
         return res.status(403).json({ message: 'Only leaders can update workspace tasks.' });
       }
     }
@@ -130,7 +130,7 @@ exports.deleteTask = async (req, res) => {
         workspaceId: task.workspaceId, 
         userId: req.user._id 
       });
-      if (!membership || membership.role !== 'Admin') {
+      if (!membership || membership.role !== 'leader') {
         return res.status(403).json({ message: 'Only leaders can delete workspace tasks.' });
       }
     }

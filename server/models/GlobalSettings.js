@@ -5,6 +5,10 @@ const globalSettingsSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  allowUserRegistration: {
+    type: Boolean,
+    default: true
+  },
   contactPhone: String,
   contactEmail: {
     type: String,

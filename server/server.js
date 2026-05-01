@@ -7,7 +7,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
@@ -33,7 +33,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/tags', tagRoutes);
 app.use('/api/invites', inviteRoutes);
 
-// Basic Route for testing
+// Basic Route for health check
 app.get('/', (req, res) => {
   res.send('Task Management API is running...');
 });
@@ -42,12 +42,10 @@ app.get('/', (req, res) => {
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
-    // Start Server only after DB connection
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
   .catch((err) => {
     console.error('Database connection error:', err.message);
-    console.log('Please ensure you have set a valid MONGODB_URI in your .env file.');
   });

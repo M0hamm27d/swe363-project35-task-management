@@ -23,15 +23,9 @@ const taskSchema = new mongoose.Schema({
     max: 100,
     default: 0
   },
-  isCompleted: {
+  completed: {
     type: Boolean,
     default: false
-  },
-  progress: {
-    type: Number,
-    default: 0,
-    min: 0,
-    max: 100
   },
   estimatedFinish: {
     days: { type: Number, default: 0 },
@@ -48,11 +42,6 @@ const taskSchema = new mongoose.Schema({
   deadline: {
     type: Date
   },
-  estimatedTime: {
-    days: { type: Number, default: 0 },
-    hours: { type: Number, default: 0 },
-    mins: { type: Number, default: 0 }
-  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -61,9 +50,9 @@ const taskSchema = new mongoose.Schema({
   workspaceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Workspace',
-    required: true
+    required: false // Optional for personal tasks
   },
-  tagId: {
+  tag: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Tag'
   }

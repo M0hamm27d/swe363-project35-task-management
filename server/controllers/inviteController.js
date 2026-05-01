@@ -17,7 +17,7 @@ exports.sendInvite = async (req, res) => {
       userId: req.user._id
     });
 
-    if (!requesterMembership || requesterMembership.role !== 'Admin') {
+    if (!requesterMembership || requesterMembership.role !== 'leader') {
       return res.status(403).json({ message: 'Only workspace leaders can send invitations.' });
     }
 
@@ -92,7 +92,7 @@ exports.respondToInvite = async (req, res) => {
       await WorkspaceMember.create({
         workspaceId: invite.workspaceId,
         userId: invite.receiverId,
-        role: 'Member'
+        role: 'member'
       });
       
       invite.status = 'accepted';
