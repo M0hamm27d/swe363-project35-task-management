@@ -16,6 +16,7 @@ const workspaceRoutes = require('./routes/workspaceRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const systemRoutes = require('./routes/systemRoutes');
 const profileRoutes = require('./routes/profileRoutes');
+const tagRoutes = require('./routes/tagRoutes');
 
 // Middleware
 app.use(cors());
@@ -28,6 +29,7 @@ app.use('/api/workspaces', workspaceRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/tags', tagRoutes);
 
 // Basic Route for testing
 app.get('/', (req, res) => {
