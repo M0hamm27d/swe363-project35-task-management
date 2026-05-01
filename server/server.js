@@ -17,6 +17,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const systemRoutes = require('./routes/systemRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const tagRoutes = require('./routes/tagRoutes');
+const inviteRoutes = require('./routes/inviteRoutes');
 
 // Middleware
 app.use(cors());
@@ -30,6 +31,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/tags', tagRoutes);
+app.use('/api/invites', inviteRoutes);
 
 // Basic Route for testing
 app.get('/', (req, res) => {
