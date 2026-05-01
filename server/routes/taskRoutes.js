@@ -11,10 +11,14 @@ const { protect, userOnly } = require('../middleware/authMiddleware');
 router.use(protect);
 router.use(userOnly);
 
-// GET all tasks & POST a new task
-router.route('/')
-  .get(getTasks)
-  .post(createTask);
+// GET personal tasks for the user
+router.get('/personal', getPersonalTasks);
+
+// GET tasks for a specific workspace
+router.get('/workspace/:workspaceId', getWorkspaceTasks);
+
+// POST a new task (Can be personal or workspace based on req.body)
+router.post('/', createTask);
 
 // UPDATE & DELETE a specific task by ID
 router.route('/:id')
