@@ -1184,9 +1184,10 @@
 
   /* 📅 Month Overview Grid (12 months) */
   .month-overview-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns is more usable */
-    gap: 10px;
-    padding: 10px;
+    grid-template-columns: repeat(2, 1fr); 
+    grid-template-rows: auto; /* Fix: allow rows to grow naturally to prevent intersection */
+    gap: 8px;
+    padding: 8px;
     overflow-y: auto;
   }
 
