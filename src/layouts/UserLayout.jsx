@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, Navigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import Logo from "../components/Logo";
 import Footer from "../components/Footer";
@@ -59,6 +59,10 @@ function UserLayout() {
   const { user } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   const userInitial = user?.firstName?.charAt(0).toUpperCase() || "U";
   const closeSidebar = () => setSidebarOpen(false);

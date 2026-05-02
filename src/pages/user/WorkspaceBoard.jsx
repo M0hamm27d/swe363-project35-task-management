@@ -13,11 +13,17 @@ import './WorkspaceBoard.css';
 function WorkspaceBoard() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { workspaces, setWorkspaces } = useWorkspaces();
-  const { tasks, tags, addTask, updateTask, deleteTask, toggleComplete, clearCompleted, addTag, editTag, deleteTag } = useTasks();
+  const { workspaces, setWorkspaces, disbandWorkspace, leaveWorkspace, removeMember } = useWorkspaces();
+  const { tasks, tags, addTask, updateTask, deleteTask, toggleComplete, clearCompleted, addTag, editTag, deleteTag, fetchWorkspaceTasks } = useTasks();
+
+  useEffect(() => {
+    if (id) {
+      fetchWorkspaceTasks(id);
+    }
+  }, [id]);
 
   const workspace = workspaces.find(ws => ws.id === id);
-  const isLeader = workspace && workspace.members[0] === "You";
+  const isLeader = workspace && workspace.role === 'leader';
 
   const [view, setView] = useState('inbox');
   const [selectedTag, setSelectedTag] = useState(null);  // tag name | null
@@ -356,12 +362,12 @@ function WorkspaceBoard() {
             <div className="workspace-info-body">
               <h3>Members ({workspace.members.length})</h3>
               <ul className="workspace-member-list">
-                {workspace.members.map((member, index) => (
+                {workspace.memberDetails ? workspace.memberDetails.map((member, index) => (
                   <li key={index} className="workspace-member-item" onMouseLeave={() => setMemberMenuOpen(null)}>
                     <div className="workspace-member-avatar" style={{ '--ws-color': workspace.color }}>
-                      {member.charAt(0).toUpperCase()}
+                      {member.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="workspace-member-name">{member}</span>
+                    <span className="workspace-member-name">{member.name}</span>
 
                     {index === 0 && (
                       <span className="workspace-leader-badge" title="Team Leader">
@@ -373,12 +379,12 @@ function WorkspaceBoard() {
                       <div className="member-menu-wrapper">
                         <button
                           className="member-menu-btn"
-                          onClick={e => { e.stopPropagation(); setMemberMenuOpen(memberMenuOpen === member ? null : member); }}
-                          aria-label={`Options for ${member}`}
+                          onClick={e => { e.stopPropagation(); setMemberMenuOpen(memberMenuOpen === member.id ? null : member.id); }}
+                          aria-label={`Options for ${member.name}`}
                         >
                           ⋮
                         </button>
-                        {memberMenuOpen === member && (
+                        {memberMenuOpen === member.id && (
                           <div className="member-dropdown">
                             <button
                               className="member-dropdown__item member-dropdown__item--danger"
@@ -391,6 +397,13 @@ function WorkspaceBoard() {
                         )}
                       </div>
                     )}
+                  </li>
+                )) : workspace.members.map((memberName, index) => (
+                  <li key={index} className="workspace-member-item">
+                    <div className="workspace-member-avatar" style={{ '--ws-color': workspace.color }}>
+                      {memberName.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="workspace-member-name">{memberName}</span>
                   </li>
                 ))}
               </ul>
@@ -432,18 +445,16 @@ function WorkspaceBoard() {
         >
           <div className="delete-modal" onClick={e => e.stopPropagation()}>
             <h3 className="delete-modal__title">Kick Member</h3>
-            <p className="delete-modal__body">
-              Are you sure you want to remove <strong>{memberToKick}</strong> from <strong>{workspace.name}</strong>? They will immediately lose access to this workspace.
+              <p className="delete-modal__body">
+              Are you sure you want to remove <strong>{memberToKick?.name || memberToKick}</strong> from <strong>{workspace.name}</strong>? They will immediately lose access to this workspace.
             </p>
             <div className="delete-modal__actions">
               <button
                 className="delete-modal__btn delete-modal__btn--danger"
                 onClick={() => {
-                  setWorkspaces(prev => prev.map(ws =>
-                    ws.id === id
-                      ? { ...ws, members: ws.members.filter(m => m !== memberToKick) }
-                      : ws
-                  ));
+                  if (memberToKick && memberToKick.id) {
+                    removeMember(id, memberToKick.id);
+                  }
                   setMemberToKick(null);
                 }}
               >
@@ -555,7 +566,11 @@ function WorkspaceBoard() {
               <button
                 className="delete-modal__btn delete-modal__btn--danger"
                 onClick={() => {
-                  setWorkspaces(prev => prev.filter(ws => ws.id !== id));
+                  if (isLeader) {
+                    disbandWorkspace(id);
+                  } else {
+                    leaveWorkspace(id);
+                  }
                   setLeaveModalOpen(false);
                   navigate('/workspace');
                 }}

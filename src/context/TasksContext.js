@@ -57,6 +57,24 @@ export function TasksProvider({ children }) {
     }
   };
 
+  const fetchWorkspaceTasks = async (workspaceId) => {
+    try {
+      const response = await api.get(`/tasks/workspace/${workspaceId}`);
+      
+      const formattedTasks = response.data.map(t => ({
+        ...t,
+        id: t._id
+      }));
+      
+      setTasks(prev => {
+        const otherTasks = prev.filter(t => t.workspaceId !== workspaceId);
+        return [...otherTasks, ...formattedTasks];
+      });
+    } catch (error) {
+      console.error('Failed to fetch workspace tasks', error);
+    }
+  };
+
   const addTask = async (newTaskFields) => {
     // 1. Optimistic Update: Show immediately on UI
     const tempId = Date.now().toString(); // fake ID until server responds
@@ -198,7 +216,8 @@ export function TasksProvider({ children }) {
       addTag,
       editTag,
       deleteTag,
-      fetchPersonalTasks
+      fetchPersonalTasks,
+      fetchWorkspaceTasks
     }}>
       {children}
     </TasksContext.Provider>
