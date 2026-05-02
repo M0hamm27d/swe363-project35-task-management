@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../utils/api';
 import './Footer.css';
 
 const SocialIcons = {
@@ -25,33 +26,57 @@ const SocialIcons = {
 };
 
 function Footer() {
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await api.get('/system/settings');
+        if (response.data) setSettings(response.data);
+      } catch (error) {
+        console.error('Error fetching footer settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const email = settings?.contactEmail || '';
+  const phone = settings?.contactPhone || '';
+  const socials = settings?.socialLinks || {};
+
   return (
     <footer className="user-footer">
       <div className="footer-content">
-        <div className="footer-section">
-          <h4 className="footer-title">Contact Us</h4>
-          <div className="footer-info">
-            <div className="footer-item">
-              <span className="footer-label">Email:</span>
-              <a href="mailto:Group35@kfupm.edu.sa" className="footer-link">Group35@kfupm.edu.sa</a>
-            </div>
-            <div className="footer-item">
-              <span className="footer-label">Number:</span>
-              <span className="footer-text">+966 50 234 5678</span>
+        {(email || phone) && (
+          <div className="footer-section">
+            <h4 className="footer-title">Contact Us</h4>
+            <div className="footer-info">
+              {email && (
+                <div className="footer-item">
+                  <span className="footer-label">Email:</span>
+                  <a href={`mailto:${email}`} className="footer-link">{email}</a>
+                </div>
+              )}
+              {phone && (
+                <div className="footer-item">
+                  <span className="footer-label">Number:</span>
+                  <span className="footer-text">{phone}</span>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
         
         <div className="footer-section">
           <h4 className="footer-title">Follow Us</h4>
           <div className="footer-socials">
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="LinkedIn">
+            <a href={socials.linkedin || "https://linkedin.com"} target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="LinkedIn">
               {SocialIcons.LinkedIn}
             </a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Instagram">
+            <a href={socials.instagram || "https://instagram.com"} target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Instagram">
               {SocialIcons.Instagram}
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="X">
+            <a href={socials.twitter || "https://twitter.com"} target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="X">
               {SocialIcons.X}
             </a>
           </div>

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../utils/api";
 import { Link, Outlet, useLocation, Navigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import Logo from "../components/Logo";
@@ -67,7 +68,38 @@ const navItems = [
 function UserLayout() {
   const { user } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMaintenance, setIsMaintenance] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const checkMaintenance = async () => {
+      try {
+        const response = await api.get('/system/settings');
+        if (response.data && response.data.maintenanceMode) {
+          setIsMaintenance(true);
+        }
+      } catch (error) {
+        console.error('Error checking system status:', error);
+      }
+    };
+    checkMaintenance();
+  }, []);
+
+  if (isMaintenance) {
+    return (
+      <div className="maintenance-overlay">
+        <div className="maintenance-card">
+          <div className="maintenance-icon">🛠️</div>
+          <h1 className="maintenance-title">Under Maintenance</h1>
+          <p className="maintenance-text">
+            Our system is currently undergoing scheduled maintenance to improve your experience. 
+            We'll be back online shortly!
+          </p>
+          <div className="maintenance-footer">Team UrgenSee</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -123,11 +155,13 @@ function UserLayout() {
         </nav>
       </aside>
 
-      <main className="main-content">
-        <NotificationBanner />
-        <Outlet />
+      <div className="main-wrapper">
+        <main className="main-content">
+          <NotificationBanner />
+          <Outlet />
+        </main>
         <Footer />
-      </main>
+      </div>
     </div>
   );
 }

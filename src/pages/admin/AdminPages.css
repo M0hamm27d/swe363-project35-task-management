@@ -718,3 +718,110 @@
     width: 100%;
   }
 }
+/* Admin Toggles & Settings */
+.admin-toggle-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.admin-toggle-card:hover {
+  background: rgba(47, 128, 237, 0.05);
+  border-color: rgba(47, 128, 237, 0.2);
+}
+
+.toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toggle-title {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.toggle-desc {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* Custom Switch Logic */
+.admin-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.admin-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.admin-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.admin-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .admin-slider {
+  background-color: #2f80ed;
+}
+
+input:focus + .admin-slider {
+  box-shadow: 0 0 1px #2f80ed;
+}
+
+input:checked + .admin-slider:before {
+  transform: translateX(24px);
+}
+
+.social-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.social-icon-wrapper.twitter { color: #fff; }
+.social-icon-wrapper.instagram { 
+  color: #fff;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+.social-icon-wrapper.linkedin { color: #fff; background: #0077B5; }
+
+.social-icon-wrapper:hover {
+  transform: scale(1.1) rotate(5deg);
+  filter: brightness(1.2);
+}
+
