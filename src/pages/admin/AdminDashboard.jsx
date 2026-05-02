@@ -37,7 +37,9 @@ function AdminDashboard() {
         </div>
         <div className="admin-card">
           <span className="admin-card__label">System Status</span>
-          <span className="admin-card__value">{stats.systemStatus}</span>
+          <span className={`admin-card__value ${stats.systemStatus === 'Maintenance' ? 'admin-card__value--warning' : 'admin-card__value--success'}`}>
+            {stats.systemStatus}
+          </span>
         </div>
       </div>
 

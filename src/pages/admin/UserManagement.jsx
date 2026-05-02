@@ -1,114 +1,70 @@
-import { useMemo, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import api from "../../utils/api";
+import "./AdminPages.css";
 
 function UserManagement() {
+  const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
-  const [users, setUsers] = useState([
-    {
-      id: "202219282",
-      name: "Omar Akshsss",
-      email: "Omar3333@gmail.com",
-      date: "17/06/2020",
-      status: "75%",
-      workAs: "Admin",
-      banned: false,
-    },
-    {
-      id: "202255232",
-      name: "Ali Alshgwege",
-      email: "Alshgwege@gmail.com",
-      date: "24/11/2020",
-      status: "20%",
-      workAs: "Regular user",
-      banned: false,
-    },
-    {
-      id: "202219555",
-      name: "Bader Bateman",
-      email: "Bader20211@gmail.com",
-      date: "28/03/2019",
-      status: "50%",
-      workAs: "Team leader",
-      banned: false,
-    },
-    {
-      id: "299919282",
-      name: "Sara Maguire",
-      email: "Sara3332@gmail.com",
-      date: "22/01/2021",
-      status: "75%",
-      workAs: "Team leader",
-      banned: false,
-    },
-    {
-      id: "202219999", // Fixed duplicate ID
-      name: "Yzead Bickle",
-      email: "Bickle323@gmail.com",
-      date: "04/02/2021",
-      status: "75%",
-      workAs: "Team leader",
-      banned: true,
-    },
-  ]);
-
-  const [newUser, setNewUser] = useState({
-    name: "",
-    email: "",
-    workAs: "Regular user",
-  });
-
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const roles = ["Regular user", "Team leader", "Admin"];
 
-  const filteredUsers = useMemo(() => {
-    return users.filter(
-      (user) =>
-        user.name.toLowerCase().includes(search.toLowerCase()) ||
-        user.email.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [search, users]);
+  const fetchUsers = useCallback(async (pageNum = 1, searchQuery = "") => {
+    try {
+      setIsLoading(true);
+      const response = await api.get(`/admin/users?page=${pageNum}&limit=10&search=${searchQuery}`);
+      setUsers(response.data.users);
+      setTotalPages(response.data.totalPages);
+      setPage(response.data.currentPage);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  const toggleBan = (id) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === id ? { ...user, banned: !user.banned } : user
-      )
-    );
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchUsers(1, search);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search, fetchUsers]);
+
+  const toggleBan = async (id) => {
+    try {
+      await api.put(`/admin/users/${id}/ban`);
+      setUsers(prev => prev.map(u => u._id === id ? { ...u, isBanned: !u.isBanned } : u));
+    } catch (error) {
+      console.error("Error toggling ban:", error);
+    }
+  };
+
+  const handleDelete = async (id, name) => {
+    if (window.confirm(`Are you sure you want to PERMANENTLY delete user "${name}"? This action cannot be undone.`)) {
+      try {
+        await api.delete(`/admin/users/${id}`);
+        setUsers(prev => prev.filter(u => u._id !== id));
+      } catch (error) {
+        alert("Failed to delete user.");
+      }
+    }
   };
 
   const toggleSelect = (id) => {
     setSelectedIds(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id) 
-        : [...prev, id]
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === filteredUsers.length) {
+    if (selectedIds.length === users.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredUsers.map(u => u.id));
+      setSelectedIds(users.map(u => u._id));
     }
   };
 
-  const addUser = () => {
-    const item = {
-      id: Date.now().toString(),
-      name: newUser.name,
-      email: newUser.email,
-      date: "11/04/2026",
-      status: "75%",
-      workAs: newUser.workAs,
-      banned: false,
-    };
-
-    setUsers((prev) => [item, ...prev]);
-    setNewUser({ name: "", email: "", workAs: "Regular user" });
-  };
-
-  // Removed unused getBarColor to clean up ESLint warnings
-  
   const getRoleBadgeClass = (role) => {
     const r = role.toLowerCase();
     if (r === "admin") return "admin-role-badge--admin";
@@ -117,45 +73,34 @@ function UserManagement() {
   };
 
   const exportUsersAsCSV = () => {
-    // If IDs are selected, export only those. Otherwise, export everything in the current filter.
     const usersToExport = selectedIds.length > 0 
-      ? users.filter(u => selectedIds.includes(u.id))
-      : filteredUsers;
+      ? users.filter(u => selectedIds.includes(u._id))
+      : users;
 
     if (usersToExport.length === 0) {
       alert("No users to export.");
       return;
     }
 
-    // Create CSV header
-    const headers = ["ID", "Name", "Email", "Date of Login", "Status", "Work As", "Account Status"];
-    
-    // Create CSV rows
+    const headers = ["ID", "Name", "Email", "Role", "Last Login", "Activity Status"];
     const rows = usersToExport.map(user => [
-      user.id,
+      user._id,
       user.name,
       user.email,
-      user.date,
-      user.status,
       user.workAs,
-      user.banned ? "Banned" : "Active"
+      user.date,
+      user.isBanned ? "Banned" : "Active"
     ]);
 
-    // Combine headers and rows
     const csvContent = [
       headers.join(","),
       ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
     ].join("\n");
 
-    // Create blob and download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute("href", url);
+    link.href = URL.createObjectURL(blob);
     link.setAttribute("download", `users_export_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = "hidden";
-    
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -166,81 +111,20 @@ function UserManagement() {
       <h1 className="admin-page-title">User Management</h1>
 
       <div className="admin-panel">
-        <form 
-          className="admin-action-bar" 
-          onSubmit={(e) => {
-            e.preventDefault();
-            addUser();
-          }}
-        >
-          <div className="admin-field-group">
+        <div className="admin-action-bar">
+          <div className="admin-search-wrapper" style={{ flex: 1 }}>
             <input
               type="text"
-              placeholder="Name"
-              value={newUser.name}
-              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+              placeholder="Search users by name or email address..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="admin-input"
-              required
+              style={{ width: '100%', maxWidth: '400px' }}
             />
           </div>
-          <div className="admin-field-group">
-            <input
-              type="email"
-              placeholder="Email"
-              value={newUser.email}
-              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-              className="admin-input"
-              required
-            />
-          </div>
-          <div className="admin-field-group">
-            <div 
-              className={`admin-custom-select ${isDropdownOpen ? 'admin-custom-select--open' : ''}`}
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            >
-              <div className="admin-custom-select__trigger">
-                <span>{newUser.workAs}</span>
-                <div className="admin-custom-select__chevron">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </div>
-              </div>
-              
-              {isDropdownOpen && (
-                <div className="admin-custom-select__menu">
-                  {roles.map((role) => (
-                    <div 
-                      key={role}
-                      className={`admin-custom-select__option ${newUser.workAs === role ? 'admin-custom-select__option--active' : ''}`}
-                      onClick={() => {
-                        setNewUser({ ...newUser, workAs: role });
-                        setIsDropdownOpen(false);
-                      }}
-                    >
-                      {role}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <button type="submit" className="admin-btn admin-btn--primary">
-            Add user
-          </button>
-        </form>
 
-        <div className="admin-action-bar">
-          <input
-            type="text"
-            placeholder="Search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="admin-input"
-            style={{ maxWidth: 240 }}
-          />
           <button onClick={exportUsersAsCSV} className="admin-btn admin-btn--secondary">
-            {selectedIds.length > 0 ? `Export Selected (${selectedIds.length})` : "Export All to CSV"}
+            {selectedIds.length > 0 ? `Export Selected (${selectedIds.length})` : "Export Page to CSV"}
           </button>
         </div>
 
@@ -253,7 +137,7 @@ function UserManagement() {
                     <input 
                       type="checkbox" 
                       onChange={toggleSelectAll}
-                      checked={selectedIds.length === filteredUsers.length && filteredUsers.length > 0}
+                      checked={selectedIds.length === users.length && users.length > 0}
                     />
                     <span className="admin-checkmark"></span>
                   </label>
@@ -261,64 +145,94 @@ function UserManagement() {
                 <th>Name</th>
                 <th>E-mail</th>
                 <th>Date of log in</th>
-                <th>Status</th>
+                <th>1h Daily Goal</th>
                 <th>ID</th>
                 <th>Work as</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className={selectedIds.includes(user.id) ? "admin-table-row--selected" : ""}>
-                  <td data-label="Select">
-                    <label className="admin-checkbox-container">
-                      <input 
-                        type="checkbox" 
-                        checked={selectedIds.includes(user.id)}
-                        onChange={() => toggleSelect(user.id)}
-                      />
-                      <span className="admin-checkmark"></span>
-                    </label>
-                  </td>
-                  <td data-label="Name">{user.name}</td>
-                  <td data-label="E-mail" style={{ color: "#4f8ef7", wordBreak: 'break-all' }}>{user.email}</td>
-                  <td data-label="Date">{user.date}</td>
-                  <td data-label="Statistics">
-                    <div className="admin-status-bar">
-                      <div className="admin-status-track">
-                        <div
-                          className={`admin-status-fill ${
-                            user.status === "20%"
-                              ? "admin-status-fill--low"
-                              : user.status === "50%"
-                              ? "admin-status-fill--medium"
-                              : "admin-status-fill--high"
-                          }`}
-                          style={{ width: user.status }}
+              {isLoading ? (
+                <tr><td colSpan="8" className="admin-text" style={{ textAlign: 'center', padding: '40px' }}>Syncing with database...</td></tr>
+              ) : users.length > 0 ? (
+                users.map((user) => (
+                  <tr key={user._id} className={selectedIds.includes(user._id) ? "admin-table-row--selected" : ""}>
+                    <td>
+                      <label className="admin-checkbox-container">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIds.includes(user._id)}
+                          onChange={() => toggleSelect(user._id)}
                         />
+                        <span className="admin-checkmark"></span>
+                      </label>
+                    </td>
+                    <td data-label="Name" style={{ fontWeight: 600 }}>{user.name}</td>
+                    <td data-label="E-mail" style={{ color: "#4f8ef7" }}>{user.email}</td>
+                    <td data-label="Date">{user.date}</td>
+                    <td data-label="Goal Progress">
+                      <div className="admin-status-bar">
+                        <div className="admin-status-track">
+                          <div
+                            className="admin-status-fill"
+                            style={{ 
+                              width: user.status,
+                              background: parseInt(user.status) > 80 ? '#4caf50' : parseInt(user.status) > 50 ? '#ff9800' : '#f44336'
+                            }}
+                          />
+                        </div>
+                        <span style={{ fontSize: '12px', fontWeight: 600 }}>{user.status}</span>
                       </div>
-                      <span>{user.status}</span>
-                    </div>
-                  </td>
-                  <td data-label="ID">{user.id}</td>
-                  <td data-label="Role">
-                    <span className={`admin-role-badge ${getRoleBadgeClass(user.workAs)}`}>
-                      {user.workAs}
-                    </span>
-                  </td>
-                  <td data-label="Action">
-                    <button
-                      onClick={() => toggleBan(user.id)}
-                      className={`admin-btn ${user.banned ? "admin-btn--secondary" : "admin-btn--danger"}`}
-                      style={{ marginTop: 0, width: 'auto' }}
-                    >
-                      {user.banned ? "Unban" : "Ban"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td data-label="ID" style={{ fontSize: '11px', opacity: 0.7 }}>{user._id}</td>
+                    <td data-label="Role">
+                      <span className={`admin-role-badge ${getRoleBadgeClass(user.workAs)}`}>
+                        {user.workAs}
+                      </span>
+                    </td>
+                    <td data-label="Action">
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => toggleBan(user._id)}
+                          className={`admin-btn ${user.isBanned ? "admin-btn--secondary" : "admin-btn--danger"}`}
+                          style={{ padding: '6px 12px', fontSize: '12px', marginTop: 0 }}
+                        >
+                          {user.isBanned ? "Unban" : "Ban"}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(user._id, user.name)}
+                          className="admin-btn admin-btn--danger"
+                          style={{ padding: '6px 12px', fontSize: '12px', marginTop: 0, background: '#dc2626' }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan="8" className="admin-text" style={{ textAlign: 'center', padding: '40px' }}>No users found matching your criteria.</td></tr>
+              )}
             </tbody>
           </table>
+        </div>
+
+        <div className="admin-pagination">
+          <button 
+            disabled={page === 1} 
+            onClick={() => fetchUsers(page - 1, search)}
+            className="pagination-btn"
+          >
+            &laquo; Prev
+          </button>
+          <span className="pagination-info">Page {page} of {totalPages}</span>
+          <button 
+            disabled={page === totalPages} 
+            onClick={() => fetchUsers(page + 1, search)}
+            className="pagination-btn"
+          >
+            Next &raquo;
+          </button>
         </div>
       </div>
     </div>

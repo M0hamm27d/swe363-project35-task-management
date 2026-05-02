@@ -825,3 +825,52 @@ input:checked + .admin-slider:before {
   filter: brightness(1.2);
 }
 
+
+.admin-card__value--success { color: #4caf50 !important; }
+.admin-card__value--warning { color: #ff9800 !important; }
+
+
+.admin-fetch-box {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  justify-content: center;
+}
+
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 32px;
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pagination-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: rgba(47, 128, 237, 0.1);
+  border-color: #2f80ed;
+  color: #fff;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+}

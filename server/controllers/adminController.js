@@ -4,6 +4,7 @@ const Task = require('../models/Task');
 const Workspace = require('../models/Workspace');
 const GlobalSettings = require('../models/GlobalSettings');
 const DailyStat = require('../models/DailyStat');
+const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 
 // ==========================================
@@ -50,12 +51,16 @@ exports.getDashboardStats = async (req, res) => {
       });
     }
 
+    // Check maintenance status from GlobalSettings
+    const settings = await GlobalSettings.findOne();
+    const systemStatus = settings && settings.maintenanceMode ? 'Maintenance' : 'Online';
+
     res.json({
       totalUsers,
       activeTasks,
       totalWorkspaces,
       usageMetrics,
-      systemStatus: 'Online'
+      systemStatus
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -125,33 +130,105 @@ exports.updateAnnouncement = async (req, res) => {
 // ==========================================
 
 /**
- * @desc    Get all users in the system
+ * @desc    Get all users with pagination and search
  * @route   GET /api/admin/users
  * @access  Private (Admin Only)
  */
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}).select('-password');
-    res.json(users);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+    const skip = (page - 1) * limit;
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const users = await User.find(query)
+      .select('-password')
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const total = await User.countDocuments(query);
+
+    // Enhance users with "Team Leader" role if they own a workspace
+    const enhancedUsers = await Promise.all(users.map(async (u) => {
+      const userObj = u.toObject();
+      // 1. Check if they are an Admin
+      const isAdmin = await Admin.exists({ email: u.email });
+      
+      let workAs = 'Regular User';
+      if (isAdmin) {
+        workAs = 'Admin';
+      } else {
+        // 2. Check if they are a Team Leader (owns a workspace)
+        const workspaceCount = await Workspace.countDocuments({ leaderId: u._id });
+        if (workspaceCount > 0) workAs = 'Team Leader';
+      }
+      
+      // Calculate REAL "Engagement" percentage for the "1 hour a day" goal (60 mins = 100%)
+      const usage = u.dailyUsageMinutes || 0;
+      const engagement = Math.min(Math.round((usage / 60) * 100), 100);
+
+      return {
+        ...userObj,
+        name: `${u.firstName} ${u.lastName}`,
+        workAs,
+        status: `${engagement}%`,
+        date: u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'N/A'
+      };
+    }));
+
+    res.json({
+      users: enhancedUsers,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      totalUsers: total
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 /**
- * @desc    Search/Fetch a user by email to add to the management view
- * @route   POST /api/admin/users/fetch
+ * @desc    Search for a specific user by email
+ * @route   GET /api/admin/users/search
  * @access  Private (Admin Only)
  */
-exports.fetchUserByEmail = async (req, res) => {
+exports.searchUserByEmail = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
 
     const user = await User.findOne({ email }).select('-password');
-    if (!user) return res.status(404).json({ message: 'User not found in database.' });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Return the user data to be added to the Admin's local table
-    res.json(user);
+    const isAdmin = await Admin.exists({ email: user.email });
+    let workAs = 'Regular User';
+    if (isAdmin) {
+      workAs = 'Admin';
+    } else {
+      const workspaceCount = await Workspace.countDocuments({ leaderId: user._id });
+      if (workspaceCount > 0) workAs = 'Team Leader';
+    }
+
+    const usage = user.dailyUsageMinutes || 0;
+    const engagement = Math.min(Math.round((usage / 60) * 100), 100);
+
+    res.json({
+      ...user.toObject(),
+      name: `${user.firstName} ${user.lastName}`,
+      workAs,
+      status: `${engagement}%`,
+      date: user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'N/A'
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -201,6 +278,24 @@ exports.updateSettings = async (req, res) => {
     }
 
     res.json(settings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * @desc    Permanently delete a user
+ * @route   DELETE /api/admin/users/:id
+ * @access  Private (Admin Only)
+ */
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    await User.findByIdAndDelete(req.params.id);
+
+    res.json({ message: 'User deleted permanently' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

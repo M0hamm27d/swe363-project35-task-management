@@ -130,10 +130,6 @@ function AdminLayout() {
               <span>{item.label}</span>
             </Link>
           ))}
-          <button className="admin-nav-item admin-nav-item--logout" onClick={() => logout(true)}>
-            <span className="admin-icon">{Icons.logout}</span>
-            <span>Sign out</span>
-          </button>
         </nav>
       </aside>
 

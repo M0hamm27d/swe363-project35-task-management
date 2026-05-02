@@ -109,6 +109,117 @@
   height: 100%;
 }
 
+/* ─── Root Layout ─────────────────────────────────────────────────────────── */
+/* Flex row: sidebar on left, main content fills the rest */
+.user-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: #0a0f1e;
+  color: #e8e8f0;
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────────────────── */
+.sidebar {
+  width: 230px;
+  min-width: 230px;
+  height: 100vh;
+  background: #0d1526;
+  border-right: 1px solid #1a2a4a;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 28px 16px;
+  gap: 8px;
+  z-index: 100;
+  /* Smooth slide animation used on mobile */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-brand {
+  margin-bottom: 32px;
+  padding-left: 8px;
+}
+
+/* ─── Profile Avatar ──────────────────────────────────────────────────────── */
+.avatar-link {
+  text-decoration: none;
+  margin-bottom: 28px;
+}
+
+/* Circle showing the user's initial — clicking goes to Profile page */
+.avatar-circle {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e4db7, #4f8ef7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.avatar-circle:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 16px rgba(30, 77, 183, 0.6);
+}
+
+/* ─── Navigation Items ────────────────────────────────────────────────────── */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+/* Each nav link: icon + label side by side */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  color: #7070a0;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+/* Hover: slight right slide + lighter background */
+.nav-item:hover {
+  background: #132040;
+  color: #e8e8f0;
+  transform: translateX(3px);
+}
+
+/* Active: purple highlight + left border accent */
+.nav-item--active {
+  background: rgba(30, 77, 183, 0.2);
+  color: #4f8ef7;
+  border-left: 3px solid #1e4db7;
+  padding-left: 11px;
+  /* offset for the 3px border so text doesn't jump */
+}
+
+/* SVG icon sizing */
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.nav-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
 /* ─── Mobile-only buttons (hidden on desktop) ─────────────────────────────── */
 .hamburger-btn,
 .sidebar-close-btn {
@@ -122,8 +233,7 @@
 
 /* ─── Main Content Area ───────────────────────────────────────────────────── */
 .main-content {
-  flex: 1;
-  overflow-y: auto;
+  flex: 1 0 auto;
   padding: 28px;
 }
 
