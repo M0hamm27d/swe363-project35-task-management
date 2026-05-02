@@ -217,3 +217,25 @@ To test the private endpoints (Tasks, Admin, etc.) using Postman or cURL, follow
 - **Data Validation**: Strict input validation for passwords (NFR) and email formats.
 - **Environmental Safety**: Sensitive credentials are never pushed to Git (managed via `.env`).
 - **RESTful Principles**: Clean separation of concerns between models, routes, and controllers.
+
+---
+
+## 🗺️ Development Roadmap
+
+Our development journey followed a structured, iterative path to ensure a robust final product:
+
+-   **Initialize Project**: Created a dedicated `server` directory and initialized it with `npm init`.
+-   **Install Dependencies**: Installed core packages: `express`, `mongoose`, `dotenv`, `cors`, and `jsonwebtoken`.
+-   **Database Setup**: Provisioned a MongoDB Atlas cluster and configured cloud connectivity.
+-   **Folder Structure**: Implemented a modular directory system (Models, Routes, Controllers, Middleware).
+-   **Environment Variables**: Secured sensitive keys via `.env` management.
+-   **Data Models**: Defined Mongoose schemas for Users, Tasks, Workspaces, and Admin statistics.
+-   **Implement Routes**: Configured RESTful API paths for all system entities.
+-   **Build Controllers**: Wrote logic for CRUD operations, authentication flows, and administrative locks.
+-   **Add Authentication**: Integrated JWT-based authorization with Bearer Token validation.
+-   **Frontend Integration**: Updated the React context to bridge the UI with the live Express API.
+-   **Documentation**: Finalized the technical README and prepared deployment logs.
+
+> **Note:** While we followed this roadmap for the majority of the project, the process was iterative. We frequently moved back and forth between stages to debug, refine logic, and optimize the integration between the Frontend and Backend.
+
+---
