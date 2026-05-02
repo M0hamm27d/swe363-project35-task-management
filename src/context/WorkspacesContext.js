@@ -7,13 +7,16 @@ const WorkspacesContext = createContext(null);
 export function WorkspacesProvider({ children }) {
   const { user } = useUser();
   const [workspaces, setWorkspaces] = useState([]);
+  const [invites, setInvites] = useState([]);
 
-  // Fetch real workspaces when user logs in
+  // Fetch real workspaces and invites when user logs in
   useEffect(() => {
     if (user) {
       fetchWorkspaces();
+      fetchInvites();
     } else {
       setWorkspaces([]);
+      setInvites([]);
     }
   }, [user]);
 
@@ -30,6 +33,22 @@ export function WorkspacesProvider({ children }) {
       setWorkspaces(formatted);
     } catch (error) {
       console.error('Failed to fetch workspaces', error);
+    }
+  };
+
+  const fetchInvites = async () => {
+    try {
+      const response = await api.get('/invites');
+      const formatted = response.data.map(inv => ({
+        id: inv._id,
+        name: inv.workspaceId?.name || 'Unknown Workspace',
+        color: inv.workspaceId?.colorCode || '#1e4db7',
+        leader: `${inv.senderId?.firstName} ${inv.senderId?.lastName}`,
+        memberCount: inv.memberCount || 1
+      }));
+      setInvites(formatted);
+    } catch (error) {
+      console.error('Failed to fetch invites', error);
     }
   };
 
@@ -115,6 +134,30 @@ export function WorkspacesProvider({ children }) {
     }
   };
 
+  const sendInvite = async (workspaceId, userEmail) => {
+    try {
+      await api.post('/invites', { workspaceId, userEmail });
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to send invite', error);
+      return { success: false, message: error.response?.data?.message || 'Server error' };
+    }
+  };
+
+  const respondToInvite = async (inviteId, status) => {
+    try {
+      // Optimistic remove
+      setInvites(prev => prev.filter(inv => inv.id !== inviteId));
+      await api.put(`/invites/${inviteId}`, { status });
+      if (status === 'accepted') {
+        fetchWorkspaces(); // Refresh to show the new workspace
+      }
+    } catch (error) {
+      console.error(`Failed to ${status} invite`, error);
+      fetchInvites(); // Revert
+    }
+  };
+
   return (
     <WorkspacesContext.Provider value={{ 
       workspaces, 
@@ -123,7 +166,11 @@ export function WorkspacesProvider({ children }) {
       addWorkspace, 
       leaveWorkspace, 
       disbandWorkspace,
-      removeMember
+      removeMember,
+      invites,
+      fetchInvites,
+      sendInvite,
+      respondToInvite
     }}>
       {children}
     </WorkspacesContext.Provider>

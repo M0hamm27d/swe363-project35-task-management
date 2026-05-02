@@ -6,22 +6,20 @@ const workspaceInviteSchema = new mongoose.Schema({
     ref: 'Workspace',
     required: true
   },
-  userId: {
+  senderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  workspaceName: String, // Denormalized for quick display
-  leaderName: String,    // Denormalized for quick display
-  memberCount: Number,   // Denormalized for quick display
+  receiverId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   status: {
     type: String,
-    enum: ['pending', 'accepted', 'rejected'],
+    enum: ['pending', 'accepted', 'declined'],
     default: 'pending'
-  },
-  sentAt: {
-    type: Date,
-    default: Date.now
   }
 }, {
   timestamps: true

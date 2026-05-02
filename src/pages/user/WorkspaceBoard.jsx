@@ -13,7 +13,7 @@ import './WorkspaceBoard.css';
 function WorkspaceBoard() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { workspaces, setWorkspaces, disbandWorkspace, leaveWorkspace, removeMember } = useWorkspaces();
+  const { workspaces, setWorkspaces, disbandWorkspace, leaveWorkspace, removeMember, sendInvite } = useWorkspaces();
   const { tasks, tags, addTask, updateTask, deleteTask, toggleComplete, clearCompleted, addTag, editTag, deleteTag, fetchWorkspaceTasks } = useTasks();
 
   useEffect(() => {
@@ -500,7 +500,7 @@ function WorkspaceBoard() {
                 />
                 <button
                   className="invite-send-btn"
-                  onClick={() => {
+                  onClick={async () => {
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!inviteEmail.trim()) {
                       setInviteEmailError('Email address is required.');
@@ -508,8 +508,13 @@ function WorkspaceBoard() {
                       setInviteEmailError('Please enter a valid email address.');
                     } else {
                       setInviteEmailError('');
-                      setInviteSent(true);
-                      setInviteEmail('');
+                      const result = await sendInvite(id, inviteEmail);
+                      if (result.success) {
+                        setInviteSent(true);
+                        setInviteEmail('');
+                      } else {
+                        setInviteEmailError(result.message);
+                      }
                     }
                   }}
                 >
