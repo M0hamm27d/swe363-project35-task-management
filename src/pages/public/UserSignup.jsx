@@ -28,7 +28,7 @@ const EyeOffIcon = () => (
 
 function UserSignup() {
   const navigate = useNavigate();
-  const { login } = useUser();
+  const { register } = useUser();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -51,7 +51,7 @@ function UserSignup() {
     return regex.test(pass);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -72,8 +72,13 @@ function UserSignup() {
       return;
     }
 
-    login({ firstName, lastName, email });
-    navigate('/my-tasks');
+    const result = await register({ firstName, lastName, email, password }, false);
+    
+    if (result.success) {
+      navigate('/my-tasks');
+    } else {
+      setError(result.message);
+    }
   };
 
   return (

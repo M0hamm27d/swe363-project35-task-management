@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '../../context/UserContext';
 import Logo from '../../components/Logo';
 import './AdminLogin.css';
 
@@ -28,6 +29,7 @@ const EyeOffIcon = () => (
 
 function AdminLogin() {
   const navigate = useNavigate();
+  const { login } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +41,7 @@ function AdminLogin() {
     return pass.length >= 8;
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -53,8 +55,15 @@ function AdminLogin() {
       return;
     }
 
-    // Redirect to Admin Dashboard
-    navigate('/admin');
+    // Call login with isAdmin = true
+    const result = await login(email, password, true);
+
+    if (result.success) {
+      // Redirect to Admin Dashboard
+      navigate('/admin');
+    } else {
+      setError(result.message);
+    }
   };
 
   return (
