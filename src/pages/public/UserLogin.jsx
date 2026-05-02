@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '../../context/UserContext';
 import Logo from '../../components/Logo';
 import './UserLogin.css';
 
@@ -27,6 +28,7 @@ const EyeOffIcon = () => (
 
 function UserLogin() {
   const navigate = useNavigate();
+  const { login } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +40,7 @@ function UserLogin() {
     return regex.test(pass);
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -52,7 +54,13 @@ function UserLogin() {
       return;
     }
 
-    navigate('/my-tasks');
+    const result = await login(email, password, false);
+    
+    if (result.success) {
+      navigate('/my-tasks');
+    } else {
+      setError(result.message); // This will show "Invalid credentials" from the backend!
+    }
   };
 
   return (

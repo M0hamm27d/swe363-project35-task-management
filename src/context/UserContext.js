@@ -1,21 +1,66 @@
 import React, { createContext, useContext, useState } from 'react';
+import api from '../utils/api';
 
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // Initialize state from LocalStorage so users stay logged in after refresh
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-  const login = (userData) => {
-    // userData format: { firstName, lastName, email }
-    setUser(userData);
+  const login = async (email, password, isAdmin = false) => {
+    try {
+      const endpoint = isAdmin ? '/auth/admin/login' : '/auth/login';
+      const response = await api.post(endpoint, { email, password });
+      
+      const userData = response.data;
+      
+      // Save the token and user details safely in the browser
+      localStorage.setItem('token', userData.token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      setUser(userData);
+      return { success: true };
+    } catch (error) {
+      // Return the specific error message from the backend
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Login failed. Please check your credentials.' 
+      };
+    }
+  };
+
+  const register = async (userData, isAdmin = false) => {
+    try {
+      const endpoint = isAdmin ? '/auth/admin/register' : '/auth/register';
+      const response = await api.post(endpoint, userData);
+      
+      const newUserData = response.data;
+      
+      localStorage.setItem('token', newUserData.token);
+      localStorage.setItem('user', JSON.stringify(newUserData));
+      
+      setUser(newUserData);
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Registration failed.' 
+      };
+    }
   };
 
   const logout = () => {
+    // Clear the security keys when logging out
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={{ user, login, register, logout }}>
       {children}
     </UserContext.Provider>
   );
