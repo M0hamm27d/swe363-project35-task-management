@@ -36,7 +36,7 @@ function UserLogin() {
   const [error, setError] = useState('');
 
   const validatePassword = (pass) => {
-    return pass.length >= 6;
+    return pass.length >= 8;
   };
 
   const handleLogin = async (e) => {

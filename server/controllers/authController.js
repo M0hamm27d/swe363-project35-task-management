@@ -30,6 +30,12 @@ exports.registerUser = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
 
+    // NFR: Password Complexity Check
+    const { isPasswordStrong } = require('../utils/validators');
+    if (!isPasswordStrong(password)) {
+      return res.status(400).json({ message: 'Password must be 8+ characters and include uppercase, lowercase, number, and special character.' });
+    }
+
     // CHECK GLOBAL SETTINGS: Is registration allowed?
     const settings = await GlobalSettings.findOne();
     if (settings && settings.allowUserRegistration === false) {
