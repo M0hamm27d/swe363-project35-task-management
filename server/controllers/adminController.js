@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Task = require('../models/Task');
 const Workspace = require('../models/Workspace');
 const GlobalSettings = require('../models/GlobalSettings');
+const DailyStat = require('../models/DailyStat');
 const bcrypt = require('bcryptjs');
 
 // ==========================================
@@ -17,14 +18,43 @@ const bcrypt = require('bcryptjs');
 exports.getDashboardStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
-    const totalTasks = await Task.countDocuments();
+    const activeTasks = await Task.countDocuments({ completed: false });
     const totalWorkspaces = await Workspace.countDocuments();
-    
-    // You can add more complex stats here later (like daily active users)
+
+    // Fetch actual DailyStat metrics for the last 7 days
+    const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    const usageMetrics = [];
+
+    // Generate dates for the last 7 days
+    const last7Dates = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      last7Dates.push({
+        dateStr: d.toISOString().split('T')[0],
+        dayLabel: days[d.getDay()]
+      });
+    }
+
+    // Query DB for these specific dates
+    const dateStrings = last7Dates.map(d => d.dateStr);
+    const stats = await DailyStat.find({ date: { $in: dateStrings } });
+
+    // Map the results back into the ordered 7-day array
+    for (const d of last7Dates) {
+      const statForDay = stats.find(s => s.date === d.dateStr);
+      usageMetrics.push({
+        day: d.dayLabel,
+        total: totalUsers || 1, // Avoid 0 for percentage math
+        active: statForDay ? statForDay.activeUsers.length : 0
+      });
+    }
+
     res.json({
       totalUsers,
-      totalTasks,
+      activeTasks,
       totalWorkspaces,
+      usageMetrics,
       systemStatus: 'Online'
     });
   } catch (error) {
@@ -43,12 +73,11 @@ exports.getDashboardStats = async (req, res) => {
  */
 exports.createAnnouncement = async (req, res) => {
   try {
-    const { title, content, type } = req.body;
+    const { title, body } = req.body;
 
     const announcement = await Announcement.create({
       title,
-      content,
-      type, // 'info', 'warning', or 'success'
+      body,
       adminId: req.user._id
     });
 
@@ -67,6 +96,25 @@ exports.deleteAnnouncement = async (req, res) => {
   try {
     await Announcement.findByIdAndDelete(req.params.id);
     res.json({ message: 'Announcement deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * @desc    Update an announcement
+ * @route   PUT /api/admin/announcements/:id
+ * @access  Private (Admin Only)
+ */
+exports.updateAnnouncement = async (req, res) => {
+  try {
+    const { title, body } = req.body;
+    const announcement = await Announcement.findByIdAndUpdate(
+      req.params.id,
+      { title, body },
+      { new: true }
+    );
+    res.json(announcement);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -143,7 +191,7 @@ exports.updateSettings = async (req, res) => {
 
     // There is usually only one settings document
     let settings = await GlobalSettings.findOne();
-    
+
     if (!settings) {
       settings = await GlobalSettings.create(req.body);
     } else {

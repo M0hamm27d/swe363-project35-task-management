@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, Navigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import Logo from "../components/Logo";
 import Footer from "../components/Footer";
+import NotificationBanner from "../components/NotificationBanner";
 import "./UserLayout.css";
 
 // ─── Inline SVG Icons ────────────────────────────────────────────────────────
@@ -47,12 +48,20 @@ const Icons = {
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   ),
+  announcement: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 01-3.46 0" />
+    </svg>
+  ),
 };
 
 const navItems = [
   { to: "/my-tasks", label: "My Tasks", icon: Icons.tasks },
   { to: "/workspace", label: "Workspace", icon: Icons.workspace },
   { to: "/calendar", label: "Calendar", icon: Icons.calendar },
+  { to: "/announcements", label: "Announcements", icon: Icons.announcement },
 ];
 
 function UserLayout() {
@@ -115,6 +124,7 @@ function UserLayout() {
       </aside>
 
       <main className="main-content">
+        <NotificationBanner />
         <Outlet />
         <Footer />
       </main>

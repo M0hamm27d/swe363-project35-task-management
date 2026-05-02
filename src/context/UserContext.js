@@ -4,10 +4,16 @@ import api from '../utils/api';
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  // Initialize state from LocalStorage so users stay logged in after refresh
+  // Standard User State
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  // Admin State
+  const [adminUser, setAdminUser] = useState(() => {
+    const savedAdmin = localStorage.getItem('admin_user');
+    return savedAdmin ? JSON.parse(savedAdmin) : null;
   });
 
   const login = async (email, password, isAdmin = false) => {
@@ -17,11 +23,19 @@ export const UserProvider = ({ children }) => {
       
       const userData = response.data;
       
-      // Save the token and user details safely in the browser
-      localStorage.setItem('token', userData.token);
-      localStorage.setItem('user', JSON.stringify(userData));
+      // Save the token and user details safely in the browser using namespaced keys
+      const tokenKey = isAdmin ? 'admin_token' : 'token';
+      const userKey = isAdmin ? 'admin_user' : 'user';
       
-      setUser(userData);
+      localStorage.setItem(tokenKey, userData.token);
+      localStorage.setItem(userKey, JSON.stringify(userData));
+      
+      if (isAdmin) {
+        setAdminUser(userData);
+      } else {
+        setUser(userData);
+      }
+      
       return { success: true };
     } catch (error) {
       // Return the specific error message from the backend
@@ -39,10 +53,18 @@ export const UserProvider = ({ children }) => {
       
       const newUserData = response.data;
       
-      localStorage.setItem('token', newUserData.token);
-      localStorage.setItem('user', JSON.stringify(newUserData));
+      const tokenKey = isAdmin ? 'admin_token' : 'token';
+      const userKey = isAdmin ? 'admin_user' : 'user';
+
+      localStorage.setItem(tokenKey, newUserData.token);
+      localStorage.setItem(userKey, JSON.stringify(newUserData));
       
-      setUser(newUserData);
+      if (isAdmin) {
+        setAdminUser(newUserData);
+      } else {
+        setUser(newUserData);
+      }
+      
       return { success: true };
     } catch (error) {
       return { 
@@ -52,19 +74,32 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    // Clear the security keys when logging out
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
+  const logout = (isAdmin = false) => {
+    if (isAdmin) {
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('admin_user');
+      setAdminUser(null);
+    } else {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+    }
   };
 
-  const updateProfile = async (profileData) => {
+  const updateProfile = async (profileData, isAdmin = false) => {
     try {
       const response = await api.put('/profile', profileData);
-      const updatedUser = { ...user, ...response.data.user };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
+      
+      const targetKey = isAdmin ? 'admin_user' : 'user';
+      const targetState = isAdmin ? adminUser : user;
+      const setter = isAdmin ? setAdminUser : setUser;
+
+      if (targetState) {
+        const updatedData = { ...targetState, ...response.data.user };
+        localStorage.setItem(targetKey, JSON.stringify(updatedData));
+        setter(updatedData);
+      }
+      
       return { success: true };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Failed to update profile' };
@@ -81,7 +116,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, login, register, logout, updateProfile, updatePassword }}>
+    <UserContext.Provider value={{ user, adminUser, login, register, logout, updateProfile, updatePassword }}>
       {children}
     </UserContext.Provider>
   );

@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { 
+const {
   getDashboardStats,
-  createAnnouncement, 
-  deleteAnnouncement, 
-  getAllUsers, 
+  createAnnouncement,
+  deleteAnnouncement,
+  getAllUsers,
   fetchUserByEmail,
-  toggleUserBan, 
-  updateSettings 
+  toggleUserBan,
+  updateSettings
 } = require('../controllers/adminController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 

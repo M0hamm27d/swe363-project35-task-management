@@ -14,10 +14,12 @@ const UserIcon = () => (
 
 function AdminProfile() {
   const navigate = useNavigate();
-  const { user, logout, updateProfile, updatePassword } = useUser();
+  const { adminUser, logout, updateProfile, updatePassword } = useUser();
   
   const [formData, setFormData] = useState({
-    email: user?.email || "",
+    firstName: adminUser?.firstName || "",
+    lastName: adminUser?.lastName || "",
+    email: adminUser?.email || "",
     currentPassword: "",
     password: "",
     confirmPassword: ""
@@ -53,8 +55,10 @@ function AdminProfile() {
 
   const finalizeChanges = async () => {
     const profileRes = await updateProfile({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       email: formData.email
-    });
+    }, true);
 
     if (!profileRes.success) {
       setError(profileRes.message);
@@ -76,7 +80,7 @@ function AdminProfile() {
       }
     }
 
-    logout();
+    logout(true);
     navigate("/admin-login");
   };
 
@@ -84,7 +88,7 @@ function AdminProfile() {
     setShowLogoutConfirm(false);
     setIsLoggingOut(true);
     setTimeout(() => {
-      logout();
+      logout(true);
       navigate("/admin-login");
     }, 2500);
   };
@@ -99,8 +103,19 @@ function AdminProfile() {
         </header>
 
         <form className="signup-form" onSubmit={handleConfirmChanges}>
+          <div className="admin-form-grid">
+            <div className="input-group">
+              <label className="input-label" htmlFor="firstName">First Name</label>
+              <input id="firstName" type="text" className="signup-input" value={formData.firstName} onChange={handleChange} required />
+            </div>
+            <div className="input-group">
+              <label className="input-label" htmlFor="lastName">Last Name</label>
+              <input id="lastName" type="text" className="signup-input" value={formData.lastName} onChange={handleChange} required />
+            </div>
+          </div>
+
           <div className="input-group">
-            <label className="input-label" htmlFor="email">Change Email Address</label>
+            <label className="input-label" htmlFor="email">Email Address</label>
             <input id="email" type="email" className="signup-input" value={formData.email} onChange={handleChange} required />
           </div>
 
@@ -199,7 +214,7 @@ function AdminProfile() {
 
           <div className="input-group">
             <label className="input-label" htmlFor="adminId">ID</label>
-            <input id="adminId" className="signup-input" value={user?._id || user?.id || ''} readOnly style={{ background: 'rgba(255,255,255,0.02)', color: '#8ab4f8', cursor: 'default' }} />
+            <input id="adminId" className="signup-input" value={adminUser?._id || adminUser?.id || ''} readOnly style={{ background: 'rgba(255,255,255,0.02)', color: '#8ab4f8', cursor: 'default' }} />
           </div>
 
           {error && <div className="signup-error">{error}</div>}

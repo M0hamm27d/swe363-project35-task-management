@@ -1,0 +1,89 @@
+.notification-banner {
+  background: linear-gradient(90deg, rgba(47, 128, 237, 0.15) 0%, rgba(47, 128, 237, 0.05) 100%);
+  border: 1px solid rgba(47, 128, 237, 0.2);
+  border-radius: 12px;
+  padding: 12px 20px;
+  margin: 10px 20px 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: slideDown 0.4s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.notification-banner::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #2f80ed;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.banner-tag {
+  background: #2f80ed;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.banner-text {
+  font-size: 14px;
+  color: #e2e8f0;
+  line-height: 1.4;
+}
+
+.banner-title {
+  font-weight: 700;
+  color: #fff;
+  margin-right: 5px;
+}
+
+.banner-close {
+  background: none;
+  border: none;
+  color: #718096;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 5px;
+  line-height: 1;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-close:hover {
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .notification-banner {
+    margin: 10px 15px;
+    padding: 10px 15px;
+  }
+  
+  .banner-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}

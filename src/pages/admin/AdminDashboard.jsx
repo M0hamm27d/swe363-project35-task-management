@@ -1,13 +1,26 @@
+import { useState, useEffect } from "react";
+import api from "../../utils/api";
+
 function AdminDashboard() {
-  const bars = [
-    { day: "Mo", dark: 260, light: 350 },
-    { day: "Tu", dark: 220, light: 340 },
-    { day: "We", dark: 320, light: 520 },
-    { day: "Th", dark: 410, light: 560 },
-    { day: "Fr", dark: 255, light: 390 },
-    { day: "Sa", dark: 320, light: 430 },
-    { day: "Su", dark: 370, light: 450 },
-  ];
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeTasks: 0,
+    systemStatus: "Loading...",
+    usageMetrics: []
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get('/admin/stats');
+        setStats(response.data);
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats", error);
+        setStats(prev => ({ ...prev, systemStatus: "Error" }));
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <div className="admin-section">
@@ -16,15 +29,15 @@ function AdminDashboard() {
       <div className="admin-card-grid">
         <div className="admin-card">
           <span className="admin-card__label">Total Users</span>
-          <span className="admin-card__value">245</span>
+          <span className="admin-card__value">{stats.totalUsers.toLocaleString()}</span>
         </div>
         <div className="admin-card">
           <span className="admin-card__label">Active Tasks</span>
-          <span className="admin-card__value">1,023</span>
+          <span className="admin-card__value">{stats.activeTasks.toLocaleString()}</span>
         </div>
         <div className="admin-card">
           <span className="admin-card__label">System Status</span>
-          <span className="admin-card__value">Online</span>
+          <span className="admin-card__value">{stats.systemStatus}</span>
         </div>
       </div>
 
@@ -34,27 +47,38 @@ function AdminDashboard() {
           <div className="admin-chart-legend">
             <span className="admin-chart-legend-item">
               <span className="admin-chart-dot"></span>
-              <span>Daily active</span>
+              <span>Active Users (Real-time)</span>
             </span>
             <span className="admin-chart-legend-item">
               <span className="admin-chart-dot admin-chart-dot--secondary"></span>
-              <span>Projected</span>
+              <span>Total Registered Users</span>
             </span>
           </div>
         </div>
 
-        <p className="admin-text">Hover over each bar to see daily trends and compare active usage.</p>
+        <p className="admin-text">Hover over each bar to see unique daily logins compared to your total user base.</p>
 
         <div className="admin-bar-grid">
-          {bars.map((bar) => (
-            <div key={bar.day} className="admin-bar-cell">
-              <div className="admin-bar-track">
-                <div className="admin-bar" style={{ height: `${bar.dark / 3}px` }}></div>
-                <div className="admin-bar admin-bar--secondary" style={{ height: `${(bar.light - bar.dark) / 3}px` }}></div>
+          {stats.usageMetrics && stats.usageMetrics.length > 0 ? stats.usageMetrics.map((bar) => {
+            const activeHeight = (bar.active / bar.total) * 180;
+            const percentage = Math.round((bar.active / bar.total) * 100);
+
+            return (
+              <div 
+                key={bar.day} 
+                className="admin-bar-cell" 
+                title={`${percentage}% of total users were active (${bar.active}/${bar.total})`}
+              >
+                <div className="admin-bar-track">
+                  {/* The active (blue) liquid bar */}
+                  <div className="admin-bar" style={{ height: `${activeHeight}px` }}>
+                    {percentage > 5 && <span className="admin-bar-percent">{percentage}%</span>}
+                  </div>
+                </div>
+                <div className="admin-bar-label">{bar.day}</div>
               </div>
-              <div className="admin-bar-label">{bar.day}</div>
-            </div>
-          ))}
+            );
+          }) : <p style={{ color: '#7090c0', fontSize: 14 }}>Loading chart data...</p>}
         </div>
       </section>
     </div>

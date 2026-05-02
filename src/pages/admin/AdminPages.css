@@ -104,11 +104,13 @@
 }
 
 .admin-chart-dot {
-  background: #2f80ed;
+  background: #4f8ef7;
+  box-shadow: 0 0 8px rgba(79, 142, 247, 0.4);
 }
 
 .admin-chart-dot--secondary {
-  background: #9ec4f1;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .admin-bar-grid {
@@ -130,23 +132,53 @@
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  width: 24px;
+  width: 36px;
   min-height: 180px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
   margin: 0 auto;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+  position: relative;
+}
+
+.admin-bar-track:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(47, 128, 237, 0.25);
+  border-color: rgba(79, 142, 247, 0.3);
 }
 
 .admin-bar {
   width: 100%;
-  border-radius: 14px 14px 0 0;
-  background: #2f80ed;
-  transition: background 0.2s ease;
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(0deg, #1e4db7 0%, #4f8ef7 50%, #8bb9ff 100%);
+  background-size: 100% 200%;
+  animation: liquidFlow 3s ease-in-out infinite alternate;
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 8px;
+  transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.admin-bar--secondary {
-  background: #6fb3ff;
+@keyframes liquidFlow {
+  0% { background-position: 0% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+.admin-bar-percent {
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.admin-bar-track:hover .admin-bar-percent {
+  opacity: 1;
 }
 
 .admin-bar-label {
