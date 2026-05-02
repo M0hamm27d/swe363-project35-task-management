@@ -239,3 +239,31 @@ Our development journey followed a structured, iterative path to ensure a robust
 > **Note:** While we followed this roadmap for the majority of the project, the process was iterative. We frequently moved back and forth between stages to debug, refine logic, and optimize the integration between the Frontend and Backend.
 
 ---
+
+## 🏁 Milestone 6: Final Deployment Report
+
+### 🎯 Objective Met
+The application is fully deployed and accessible via a public URL. All core functionalities (Auth, Tasks, Admin, Workspaces) have been verified in the live production environment.
+
+### 🌐 Live Production URLs
+*   **Frontend (Vercel):** [https://swe363-project35-task-management.vercel.app](https://swe363-project35-task-management.vercel.app)
+*   **Backend (Render):** [https://urgensee-api.onrender.com](https://urgensee-api.onrender.com)
+*   **Database (Cloud):** MongoDB Atlas (AWS Shared Cluster)
+
+### 🚀 Production Configurations
+1.  **Environment Variables**: All sensitive keys (MongoDB URI, JWT Secret) are managed through the hosting platform's secure environment settings.
+2.  **Security (HTTPS/CORS)**:
+    *   **HTTPS** is enforced across both Frontend and Backend.
+    *   **CORS** is configured to strictly allow requests from the Vercel production domain.
+3.  **Responsiveness**: The application has been optimized and tested for **iPhone 12 Pro Max** and Desktop viewports. Specifically, the Week View now supports a "Fixed Background" layout on mobile for maximum space utilization.
+
+### 🐞 Known Issues & Future Roadmaps
+As per the Milestone 6 requirements, we have identified minor features to be refined before the final presentation:
+
+| Feature / Issue | Status | Proposed Solution |
+| :--- | :--- | :--- |
+| **Mobile Drag-and-Drop** | ⚠️ Limited | Currently optimized for click-to-edit on mobile to avoid touch-scroll conflicts. Future: Implement long-press drag. |
+| **Task Search** | ✅ Functional | Currently searches titles. Future: Add deep-search for tags and workspace members. |
+| **Offline Sync** | ⏳ Planned | Currently requires active internet. Future: Implement Service Workers for offline task viewing. |
+
+---
