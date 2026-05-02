@@ -151,3 +151,16 @@
   font-size: 1.5rem;
   /* Balanced sidebar presence */
 }
+
+/* 📱 Mobile Responsive Scaling */
+@media (max-width: 480px) {
+  .urgensee-logo--medium {
+    font-size: 2.2rem;
+  }
+  .urgensee-logo--large {
+    font-size: 3rem;
+  }
+  .urgensee-logo--xl {
+    font-size: 4rem;
+  }
+}
