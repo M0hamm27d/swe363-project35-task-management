@@ -363,11 +363,14 @@ function WorkspaceBoard() {
               <h3>Members ({workspace.members.length})</h3>
               <ul className="workspace-member-list">
                 {workspace.memberDetails ? workspace.memberDetails.map((member, index) => (
-                  <li key={index} className="workspace-member-item" onMouseLeave={() => setMemberMenuOpen(null)}>
+                  <li key={index} className="workspace-member-item" title={member.email} onMouseLeave={() => setMemberMenuOpen(null)}>
                     <div className="workspace-member-avatar" style={{ '--ws-color': workspace.color }}>
                       {member.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="workspace-member-name">{member.name}</span>
+                    <div className="workspace-member-info">
+                      <span className="workspace-member-name">{member.name}</span>
+                      <span className="workspace-member-email">{member.email}</span>
+                    </div>
 
                     {index === 0 && (
                       <span className="workspace-leader-badge" title="Team Leader">

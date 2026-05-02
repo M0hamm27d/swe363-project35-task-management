@@ -165,8 +165,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-  max-height: 280px;
-  overflow-y: auto;
+  overflow: visible;
   padding-right: 8px;
   /* Premium Scrollbar */
   scrollbar-width: thin;
@@ -227,14 +226,29 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
+.workspace-member-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
 .workspace-member-name { 
   font-size: 14px; 
   font-weight: 600; 
   color: #e8e8f0; 
-  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.workspace-member-email {
+  font-size: 11px;
+  color: #7090c0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
 }
 
 .workspace-leader-badge { 
@@ -264,7 +278,8 @@
 .member-dropdown { 
   position: absolute; 
   right: 0; 
-  top: 100%; 
+  top: 100%;
+  margin-top: 4px;
   background: #0d1526; 
   border: 1px solid #1a2a4a; 
   border-radius: 12px; 

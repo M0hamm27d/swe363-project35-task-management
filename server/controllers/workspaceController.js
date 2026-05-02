@@ -44,14 +44,15 @@ exports.getWorkspaces = async (req, res) => {
 
     // 3. For each workspace, fetch the members and the current user's role
     const workspacesWithDetails = await Promise.all(workspaces.map(async (ws) => {
-      const allMembers = await WorkspaceMember.find({ workspaceId: ws._id }).populate('userId', 'firstName lastName');
+      const allMembers = await WorkspaceMember.find({ workspaceId: ws._id }).populate('userId', 'firstName lastName email');
       
       return {
         ...ws,
         members: allMembers.map(m => `${m.userId.firstName} ${m.userId.lastName}`),
         memberDetails: allMembers.map(m => ({
           id: m.userId._id,
-          name: `${m.userId.firstName} ${m.userId.lastName}`
+          name: `${m.userId.firstName} ${m.userId.lastName}`,
+          email: m.userId.email
         })),
         role: allMembers.find(m => m.userId._id.toString() === req.user._id.toString())?.role,
         leader: allMembers.find(m => m.role === 'leader')?.userId?.firstName // For the "Leader: Name" display
