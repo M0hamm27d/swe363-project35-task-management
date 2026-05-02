@@ -92,7 +92,7 @@ function UserLayout() {
           <div className="maintenance-icon">🛠️</div>
           <h1 className="maintenance-title">Under Maintenance</h1>
           <p className="maintenance-text">
-            Our system is currently undergoing scheduled maintenance to improve your experience. 
+            Our system is currently undergoing scheduled maintenance to improve your experience.
             We'll be back online shortly!
           </p>
           <div className="maintenance-footer">Team UrgenSee</div>
@@ -145,7 +145,7 @@ function UserLayout() {
             <Link
               key={item.to}
               to={item.to}
-              className={`nav-item ${location.pathname === item.to ? "nav-item--active" : ""}`}
+              className={`nav-item ${location.pathname === item.to || location.pathname.startsWith(item.to + "/") ? "nav-item--active" : ""}`}
               onClick={closeSidebar}
             >
               <span className="nav-icon">{item.icon}</span>
