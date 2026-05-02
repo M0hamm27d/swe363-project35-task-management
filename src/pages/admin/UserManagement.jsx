@@ -168,8 +168,8 @@ function UserManagement() {
                         <span className="admin-checkmark"></span>
                       </label>
                     </td>
-                    <td data-label="Name" style={{ fontWeight: 600 }}>{user.name}</td>
-                    <td data-label="E-mail" style={{ color: "#4f8ef7" }}>{user.email}</td>
+                    <td data-label="Name" style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>{user.name}</td>
+                    <td data-label="E-mail" style={{ color: "#4f8ef7", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '220px' }}>{user.email}</td>
                     <td data-label="Date">{user.date}</td>
                     <td data-label="Goal Progress">
                       {user.workAs?.toLowerCase().includes('admin') ? (
