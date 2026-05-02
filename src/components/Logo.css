@@ -6,7 +6,8 @@
   user-select: none;
   font-family: 'Outfit', sans-serif;
   color: #94a3b8;
-  line-height: x-height;
+  line-height: 1;
+  white-space: nowrap;
   /* Using font metrics */
 }
 
@@ -129,38 +130,53 @@
 
 /* Global sizing - Significantly increased for high-impact presence */
 .urgensee-logo--small {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
 }
 
 .urgensee-logo--medium {
-  font-size: 3rem;
+  font-size: 2.5rem;
 }
 
 /* Enhanced for Login/Signup cards */
 .urgensee-logo--large {
-  font-size: 4.5rem;
+  font-size: 3.5rem;
 }
 
 .urgensee-logo--xl {
-  font-size: 6.5rem;
+  font-size: 5.5rem;
 }
 
 /* Definitive Landing Page size */
 
 .sidebar .urgensee-logo {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   /* Balanced sidebar presence */
 }
 
 /* 📱 Mobile Responsive Scaling */
-@media (max-width: 480px) {
-  .urgensee-logo--medium {
-    font-size: 2.2rem;
+@media (max-width: 768px) {
+  .urgensee-logo--xl {
+    font-size: clamp(3rem, 12vw, 5rem);
   }
   .urgensee-logo--large {
-    font-size: 3rem;
+    font-size: clamp(2.2rem, 9vw, 3rem);
   }
-  .urgensee-logo--xl {
-    font-size: 4rem;
+  .urgensee-logo--medium {
+    font-size: clamp(1.8rem, 8vw, 2.2rem);
   }
 }
+
+@media (max-width: 480px) {
+  .urgensee-logo--xl {
+    font-size: 2.6rem;
+  }
+  .urgensee-logo--large {
+    font-size: 2rem;
+  }
+  .urgensee-logo--medium {
+    font-size: 1.6rem;
+  }
+  .urgensee-logo--small {
+    font-size: 1rem;
+  }
+}
