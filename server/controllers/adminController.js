@@ -45,14 +45,14 @@ exports.getDashboardStats = async (req, res) => {
     for (const d of last7Dates) {
       const statForDay = stats.find(s => s.date === d.dateStr);
       let activeCount = statForDay ? statForDay.activeUsers.length : 0;
-      
+
       // SAFETY: If we deleted users, the historical active count might be higher than current total.
       // We cap it at totalUsers to keep the UI logic consistent.
       if (activeCount > totalUsers) activeCount = totalUsers;
 
       usageMetrics.push({
         day: d.dayLabel,
-        total: totalUsers || 1, 
+        total: totalUsers || 1,
         active: activeCount
       });
     }
@@ -154,43 +154,71 @@ exports.getAllUsers = async (req, res) => {
       ];
     }
 
-    const users = await User.find(query)
-      .select('-password')
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 });
+    // 1. Fetch from BOTH collections to ensure full visibility
+    const [allUsers, allAdmins] = await Promise.all([
+      User.find(query).select('-password'),
+      Admin.find(query).select('-password')
+    ]);
 
-    const total = await User.countDocuments(query);
+    // 2. Merge and Deduplicate (Admins take priority)
+    const mergedMap = new Map();
 
-    const enhancedUsers = await Promise.all(users.map(async (u) => {
-      const userObj = u.toObject();
-      const isAdmin = await Admin.exists({ email: u.email });
+    // Add regular users first
+    allUsers.forEach(u => {
+      mergedMap.set(u.email.toLowerCase(), { ...u.toObject(), source: 'user' });
+    });
+
+    // Add/Overwrite with Admin data
+    allAdmins.forEach(a => {
+      const existing = mergedMap.get(a.email.toLowerCase());
+      mergedMap.set(a.email.toLowerCase(), { 
+        ...(existing || a.toObject()), 
+        workAs: 'Admin',
+        role: 'admin',
+        source: 'admin'
+      });
+    });
+
+    const mergedList = Array.from(mergedMap.values());
+
+    // 3. Apply the "Work As" logic to the full list
+    const enhancedUsers = await Promise.all(mergedList.map(async (u) => {
+      let workAs = u.workAs || 'Regular User';
       
-      let workAs = 'Regular User';
-      if (isAdmin) {
-        workAs = 'Admin';
-      } else {
-        const workspaceCount = await Workspace.countDocuments({ leaderId: u._id });
-        if (workspaceCount > 0) workAs = 'Team Leader';
+      // If not already marked as Admin from the Admin collection
+      if (workAs !== 'Admin') {
+        const isAdmin = await Admin.exists({ email: { $regex: new RegExp(`^${u.email}$`, 'i') } });
+        if (isAdmin || u.role === 'admin') {
+          workAs = 'Admin';
+        } else {
+          const workspaceCount = await Workspace.countDocuments({ leaderId: u._id });
+          if (workspaceCount > 0 || u.role === 'team leader') {
+            workAs = 'Team Leader';
+          }
+        }
       }
-      
+
       const usage = u.dailyUsageMinutes || 0;
       const engagement = Math.min(Math.round((usage / 60) * 100), 100);
 
       return {
-        ...userObj,
+        ...u,
         name: `${u.firstName} ${u.lastName}`,
         workAs,
         status: `${engagement}%`,
-        date: u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'N/A'
+        date: u.lastLogin || u.createdAt ? new Date(u.lastLogin || u.createdAt).toLocaleDateString() : 'N/A'
       };
     }));
 
+    // 4. Sort and Paginate the merged list
+    enhancedUsers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const paginatedUsers = enhancedUsers.slice(skip, skip + limit);
+
     res.json({
-      users: enhancedUsers,
-      totalPages: Math.ceil(total / limit),
+      users: paginatedUsers,
+      totalPages: Math.ceil(enhancedUsers.length / limit),
       currentPage: page,
-      totalUsers: total
+      totalUsers: enhancedUsers.length
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -210,15 +238,20 @@ exports.searchUserByEmail = async (req, res) => {
     const user = await User.findOne({ email }).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const isAdmin = await Admin.exists({ email: user.email });
+    const adminDoc = await Admin.findOne({
+      email: { $regex: new RegExp(`^${user.email}$`, 'i') }
+    });
+    const isAdmin = adminDoc || user.role === 'admin';
+
     let workAs = 'Regular User';
     if (isAdmin) {
       workAs = 'Admin';
     } else {
       const workspaceCount = await Workspace.countDocuments({ leaderId: user._id });
-      if (workspaceCount > 0) workAs = 'Team Leader';
+      if (workspaceCount > 0) {
+        workAs = 'Team Leader';
+      }
     }
-
     const usage = user.dailyUsageMinutes || 0;
     const engagement = Math.min(Math.round((usage / 60) * 100), 100);
 

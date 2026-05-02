@@ -52,7 +52,7 @@ function UserManagement() {
   };
 
   const toggleSelect = (id) => {
-    setSelectedIds(prev => 
+    setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
   };
@@ -66,14 +66,15 @@ function UserManagement() {
   };
 
   const getRoleBadgeClass = (role) => {
+    if (!role) return "admin-role-badge--user";
     const r = role.toLowerCase();
-    if (r === "admin") return "admin-role-badge--admin";
-    if (r === "team leader") return "admin-role-badge--leader";
+    if (r.includes("admin")) return "admin-role-badge--admin";
+    if (r.includes("leader")) return "admin-role-badge--leader";
     return "admin-role-badge--user";
   };
 
   const exportUsersAsCSV = () => {
-    const usersToExport = selectedIds.length > 0 
+    const usersToExport = selectedIds.length > 0
       ? users.filter(u => selectedIds.includes(u._id))
       : users;
 
@@ -89,7 +90,7 @@ function UserManagement() {
       user.email,
       user.workAs,
       user.date,
-      user.isBanned ? "Banned" : "Active"
+      user.workAs?.toLowerCase().includes('admin') ? "Unlimited" : user.isBanned ? "Banned" : "Active"
     ]);
 
     const csvContent = [
@@ -134,8 +135,8 @@ function UserManagement() {
               <tr>
                 <th>
                   <label className="admin-checkbox-container">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       onChange={toggleSelectAll}
                       checked={selectedIds.length === users.length && users.length > 0}
                     />
@@ -159,8 +160,8 @@ function UserManagement() {
                   <tr key={user._id} className={selectedIds.includes(user._id) ? "admin-table-row--selected" : ""}>
                     <td>
                       <label className="admin-checkbox-container">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={selectedIds.includes(user._id)}
                           onChange={() => toggleSelect(user._id)}
                         />
@@ -171,23 +172,29 @@ function UserManagement() {
                     <td data-label="E-mail" style={{ color: "#4f8ef7" }}>{user.email}</td>
                     <td data-label="Date">{user.date}</td>
                     <td data-label="Goal Progress">
-                      <div className="admin-status-bar">
-                        <div className="admin-status-track">
-                          <div
-                            className="admin-status-fill"
-                            style={{ 
-                              width: user.status,
-                              background: parseInt(user.status) > 80 ? '#4caf50' : parseInt(user.status) > 50 ? '#ff9800' : '#f44336'
-                            }}
-                          />
+                      {user.workAs?.toLowerCase().includes('admin') ? (
+                        <div className="admin-status-bar" style={{ justifyContent: 'center', opacity: 0.8 }}>
+                          <span style={{ fontSize: '24px', color: '#a78bfa', textShadow: '0 0 10px rgba(0, 0, 0, 0.3)' }}>∞</span>
                         </div>
-                        <span style={{ fontSize: '12px', fontWeight: 600 }}>{user.status}</span>
-                      </div>
+                      ) : (
+                        <div className="admin-status-bar">
+                          <div className="admin-status-track">
+                            <div
+                              className="admin-status-fill"
+                              style={{ 
+                                width: user.status,
+                                background: parseInt(user.status) > 80 ? '#4caf50' : parseInt(user.status) > 50 ? '#ff9800' : '#f44336'
+                              }}
+                            />
+                          </div>
+                          <span style={{ fontSize: '12px', fontWeight: 600 }}>{user.status}</span>
+                        </div>
+                      )}
                     </td>
                     <td data-label="ID" style={{ fontSize: '11px', opacity: 0.7 }}>{user._id}</td>
                     <td data-label="Role">
                       <span className={`admin-role-badge ${getRoleBadgeClass(user.workAs)}`}>
-                        {user.workAs}
+                        {user.workAs?.toLowerCase().includes('admin') ? 'ADMIN' : user.workAs}
                       </span>
                     </td>
                     <td data-label="Action">
@@ -196,9 +203,9 @@ function UserManagement() {
                           onClick={() => toggleBan(user._id)}
                           disabled={user.workAs === 'Admin'}
                           className={`admin-btn ${user.isBanned ? "admin-btn--secondary" : "admin-btn--danger"}`}
-                          style={{ 
-                            padding: '6px 12px', 
-                            fontSize: '12px', 
+                          style={{
+                            padding: '6px 12px',
+                            fontSize: '12px',
                             marginTop: 0,
                             opacity: user.workAs === 'Admin' ? 0.4 : 1,
                             cursor: user.workAs === 'Admin' ? 'not-allowed' : 'pointer'
@@ -210,10 +217,10 @@ function UserManagement() {
                           onClick={() => handleDelete(user._id, user.name)}
                           disabled={user.workAs === 'Admin'}
                           className="admin-btn admin-btn--danger"
-                          style={{ 
-                            padding: '6px 12px', 
-                            fontSize: '12px', 
-                            marginTop: 0, 
+                          style={{
+                            padding: '6px 12px',
+                            fontSize: '12px',
+                            marginTop: 0,
                             background: '#dc2626',
                             opacity: user.workAs === 'Admin' ? 0.4 : 1,
                             cursor: user.workAs === 'Admin' ? 'not-allowed' : 'pointer'
@@ -233,16 +240,16 @@ function UserManagement() {
         </div>
 
         <div className="admin-pagination">
-          <button 
-            disabled={page === 1} 
+          <button
+            disabled={page === 1}
             onClick={() => fetchUsers(page - 1, search)}
             className="pagination-btn"
           >
             &laquo; Prev
           </button>
           <span className="pagination-info">Page {page} of {totalPages}</span>
-          <button 
-            disabled={page === totalPages} 
+          <button
+            disabled={page === totalPages}
             onClick={() => fetchUsers(page + 1, search)}
             className="pagination-btn"
           >

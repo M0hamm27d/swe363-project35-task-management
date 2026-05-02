@@ -377,6 +377,7 @@
   font-weight: 600;
   color: #94a3b8;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
 }
 
 .admin-table tr {
@@ -448,12 +449,15 @@
 .admin-role-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   padding: 4px 12px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: capitalize;
+  white-space: nowrap;
+  min-width: 95px;
 }
 
 .admin-role-badge--admin {
