@@ -44,10 +44,16 @@ exports.getDashboardStats = async (req, res) => {
     // Map the results back into the ordered 7-day array
     for (const d of last7Dates) {
       const statForDay = stats.find(s => s.date === d.dateStr);
+      let activeCount = statForDay ? statForDay.activeUsers.length : 0;
+      
+      // SAFETY: If we deleted users, the historical active count might be higher than current total.
+      // We cap it at totalUsers to keep the UI logic consistent.
+      if (activeCount > totalUsers) activeCount = totalUsers;
+
       usageMetrics.push({
         day: d.dayLabel,
-        total: totalUsers || 1, // Avoid 0 for percentage math
-        active: statForDay ? statForDay.activeUsers.length : 0
+        total: totalUsers || 1, 
+        active: activeCount
       });
     }
 
@@ -79,28 +85,12 @@ exports.getDashboardStats = async (req, res) => {
 exports.createAnnouncement = async (req, res) => {
   try {
     const { title, body } = req.body;
-
     const announcement = await Announcement.create({
       title,
       body,
       adminId: req.user._id
     });
-
     res.status(201).json(announcement);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-/**
- * @desc    Delete an announcement
- * @route   DELETE /api/admin/announcements/:id
- * @access  Private (Admin Only)
- */
-exports.deleteAnnouncement = async (req, res) => {
-  try {
-    await Announcement.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Announcement deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -120,6 +110,20 @@ exports.updateAnnouncement = async (req, res) => {
       { new: true }
     );
     res.json(announcement);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * @desc    Delete an announcement
+ * @route   DELETE /api/admin/announcements/:id
+ * @access  Private (Admin Only)
+ */
+exports.deleteAnnouncement = async (req, res) => {
+  try {
+    await Announcement.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Announcement deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -158,22 +162,18 @@ exports.getAllUsers = async (req, res) => {
 
     const total = await User.countDocuments(query);
 
-    // Enhance users with "Team Leader" role if they own a workspace
     const enhancedUsers = await Promise.all(users.map(async (u) => {
       const userObj = u.toObject();
-      // 1. Check if they are an Admin
       const isAdmin = await Admin.exists({ email: u.email });
       
       let workAs = 'Regular User';
       if (isAdmin) {
         workAs = 'Admin';
       } else {
-        // 2. Check if they are a Team Leader (owns a workspace)
         const workspaceCount = await Workspace.countDocuments({ leaderId: u._id });
         if (workspaceCount > 0) workAs = 'Team Leader';
       }
       
-      // Calculate REAL "Engagement" percentage for the "1 hour a day" goal (60 mins = 100%)
       const usage = u.dailyUsageMinutes || 0;
       const engagement = Math.min(Math.round((usage / 60) * 100), 100);
 
@@ -244,10 +244,39 @@ exports.toggleUserBan = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    // SAFETY LOCK: Prevent banning an Admin
+    const isAdmin = await Admin.exists({ email: user.email });
+    if (isAdmin) {
+      return res.status(403).json({ message: 'Safety Lock: You cannot ban an administrator account.' });
+    }
+
     user.isBanned = !user.isBanned;
     await user.save();
 
     res.json({ message: `User ${user.isBanned ? 'banned' : 'unbanned'} successfully` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * @desc    Permanently delete a user
+ * @route   DELETE /api/admin/users/:id
+ * @access  Private (Admin Only)
+ */
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // SAFETY LOCK: Prevent deleting an Admin
+    const isAdmin = await Admin.exists({ email: user.email });
+    if (isAdmin) {
+      return res.status(403).json({ message: 'Safety Lock: You cannot delete an administrator account.' });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: 'User deleted permanently' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -265,37 +294,16 @@ exports.toggleUserBan = async (req, res) => {
 exports.updateSettings = async (req, res) => {
   try {
     const { allowUserRegistration, maintenanceMode } = req.body;
-
-    // There is usually only one settings document
     let settings = await GlobalSettings.findOne();
 
     if (!settings) {
       settings = await GlobalSettings.create(req.body);
     } else {
-      // Use Object.assign to update all fields sent in req.body
       Object.assign(settings, req.body);
       await settings.save();
     }
 
     res.json(settings);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-/**
- * @desc    Permanently delete a user
- * @route   DELETE /api/admin/users/:id
- * @access  Private (Admin Only)
- */
-exports.deleteUser = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    await User.findByIdAndDelete(req.params.id);
-
-    res.json({ message: 'User deleted permanently' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

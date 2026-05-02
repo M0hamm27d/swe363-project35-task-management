@@ -194,15 +194,30 @@ function UserManagement() {
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <button
                           onClick={() => toggleBan(user._id)}
+                          disabled={user.workAs === 'Admin'}
                           className={`admin-btn ${user.isBanned ? "admin-btn--secondary" : "admin-btn--danger"}`}
-                          style={{ padding: '6px 12px', fontSize: '12px', marginTop: 0 }}
+                          style={{ 
+                            padding: '6px 12px', 
+                            fontSize: '12px', 
+                            marginTop: 0,
+                            opacity: user.workAs === 'Admin' ? 0.4 : 1,
+                            cursor: user.workAs === 'Admin' ? 'not-allowed' : 'pointer'
+                          }}
                         >
                           {user.isBanned ? "Unban" : "Ban"}
                         </button>
                         <button
                           onClick={() => handleDelete(user._id, user.name)}
+                          disabled={user.workAs === 'Admin'}
                           className="admin-btn admin-btn--danger"
-                          style={{ padding: '6px 12px', fontSize: '12px', marginTop: 0, background: '#dc2626' }}
+                          style={{ 
+                            padding: '6px 12px', 
+                            fontSize: '12px', 
+                            marginTop: 0, 
+                            background: '#dc2626',
+                            opacity: user.workAs === 'Admin' ? 0.4 : 1,
+                            cursor: user.workAs === 'Admin' ? 'not-allowed' : 'pointer'
+                          }}
                         >
                           Delete
                         </button>
