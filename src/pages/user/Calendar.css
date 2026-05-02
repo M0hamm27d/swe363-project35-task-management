@@ -1182,10 +1182,54 @@
     font-size: 12px;
   }
 
-  /* Month Overview Grid */
+  /* 📅 Month Overview Grid (12 months) */
   .month-overview-grid {
-    grid-template-columns: 1fr;
-    padding: 8px;
+    grid-template-columns: repeat(2, 1fr); /* 2 columns is more usable */
+    gap: 10px;
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  .month-overview-card {
+    padding: 10px;
+    min-height: 100px;
+    gap: 4px;
+  }
+
+  .mini-month-title {
+    font-size: 11px !important;
+  }
+
+  /* 📅 Month Detail Grid (Full month) */
+  .month-detail-grid {
+    grid-template-rows: auto repeat(6, 1fr);
+    flex: 1;
+  }
+
+  .month-detail-col-header {
+    font-size: 9px;
+    padding: 8px 0;
+  }
+
+  .month-detail-cell {
+    padding: 4px;
+  }
+
+  .month-detail-date-number {
+    font-size: 11px;
+  }
+
+  .month-detail-cell--today .month-detail-date-number {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    margin-top: -2px;
+    margin-right: -2px;
+  }
+
+  .heatmap-circle {
+    width: 20px;
+    height: 20px;
   }
 
   /* 📅 Week View Specifics (7-day Fit) */
@@ -1228,4 +1272,5 @@
     padding: 8px 12px;
   }
   .cal-title { font-size: 15px; }
-}
+}
+
