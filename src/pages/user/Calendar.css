@@ -1110,3 +1110,122 @@
   color: #7080a0;
   font-weight: 500;
 }
+
+/* ─── 📱 Responsive Media Queries ────────────────────────────────────────── */
+
+/* Tablets & Small Laptops */
+@media (max-width: 1024px) {
+  .month-overview-grid {
+    grid-template-columns: repeat(3, 1fr);
+    overflow-y: auto;
+  }
+}
+
+/* Tablets (Portrait) */
+@media (max-width: 768px) {
+  .calendar-page {
+    padding: 16px;
+    gap: 12px;
+    height: calc(100vh - 56px);
+  }
+
+  .calendar-header {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px;
+  }
+
+  .month-overview-grid {
+    grid-template-columns: repeat(2, 1fr);
+    overflow-y: auto;
+  }
+}
+
+/* Mobile Phones (iPhone 12 Pro Max etc) */
+@media (max-width: 480px) {
+  /* Default Mobile Box Styling */
+  .calendar-page {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  /* 🚀 "Fixed on Background" Week View (No Floating Box) */
+  .calendar-page--week {
+    padding: 0 !important;
+    gap: 0 !important;
+    background: #0d1526;
+  }
+
+  .calendar-page--week .calendar-header {
+    border-radius: 0;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    background: rgba(13, 21, 38, 0.95);
+    padding: 8px 12px;
+  }
+
+  .calendar-page--week .calendar-content {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .calendar-toggle-btn {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .calendar-workspace-trigger {
+    height: 34px;
+    font-size: 12px;
+  }
+
+  /* Month Overview Grid */
+  .month-overview-grid {
+    grid-template-columns: 1fr;
+    padding: 8px;
+  }
+
+  /* 📅 Week View Specifics (7-day Fit) */
+  .week-timeline-container {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .week-days-grid {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .week-day-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .week-hours-col {
+    width: 45px;
+  }
+
+  .week-day-header {
+    height: 40px;
+    padding: 4px 0;
+  }
+
+  .week-day-head-name { font-size: 8px; }
+  .week-day-head-num { font-size: 12px; }
+  .week-day-head-num--today { width: 22px; height: 22px; font-size: 11px; }
+
+  .week-task-chip {
+    padding: 2px 4px 2px 0;
+    border-radius: 4px;
+  }
+  .week-task-chip__title { font-size: 9px; }
+  .week-task-chip__tag { display: none; }
+
+  .cal-view-header {
+    padding: 8px 12px;
+  }
+  .cal-title { font-size: 15px; }
+}

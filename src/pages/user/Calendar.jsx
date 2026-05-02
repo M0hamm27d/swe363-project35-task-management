@@ -170,7 +170,7 @@ export default function Calendar() {
   const month = activeDate.getMonth();
 
   return (
-    <div className="calendar-page">
+    <div className={`calendar-page ${viewMode === 'week' ? 'calendar-page--week' : ''}`}>
       {/* ─── Floating Header Bar ─── */}
       <header className="calendar-header">
         <div className="calendar-controls-group">
