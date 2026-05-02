@@ -9,7 +9,7 @@ const WorkspaceMember = require('../models/WorkspaceMember');
 exports.getPersonalTasks = async (req, res) => {
   try {
     // Find tasks where workspaceId is null (personal) AND userId matches
-    const tasks = await Task.find({ userId: req.user._id, workspaceId: null });
+    const tasks = await Task.find({ userId: req.user._id, workspaceId: null }).populate('tag');
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -31,7 +31,7 @@ exports.getWorkspaceTasks = async (req, res) => {
       return res.status(403).json({ message: 'Access denied. You are not a member of this workspace.' });
     }
 
-    const tasks = await Task.find({ workspaceId });
+    const tasks = await Task.find({ workspaceId }).populate('tag');
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: error.message });

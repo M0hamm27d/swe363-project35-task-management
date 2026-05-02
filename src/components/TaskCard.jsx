@@ -55,7 +55,7 @@ function TaskCard({ task, allTasks = [], onClick, onToggleComplete, onDelete, ca
   const { title, tag, status, deadline, progress, completed, estimatedFinish } = task;
   
   // Apply the python-derived urgency algorithm
-  const dynamicStatus = calculateTaskStatus(allTasks, task.id) || status || 'green';
+  const dynamicStatus = calculateTaskStatus(allTasks, task._id || task.id) || status || 'green';
 
   const remaining = calcRemaining(estimatedFinish, progress);
   const isOverdue = !completed && new Date(deadline) < new Date();

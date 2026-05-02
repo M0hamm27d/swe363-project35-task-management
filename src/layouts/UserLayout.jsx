@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import api from "../utils/api";
+import { Link, Outlet, useLocation, Navigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import Logo from "../components/Logo";
 import Footer from "../components/Footer";
+import NotificationBanner from "../components/NotificationBanner";
 import "./UserLayout.css";
 
 // ─── Inline SVG Icons ────────────────────────────────────────────────────────
@@ -47,18 +49,61 @@ const Icons = {
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   ),
+  announcement: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 01-3.46 0" />
+    </svg>
+  ),
 };
 
 const navItems = [
   { to: "/my-tasks", label: "My Tasks", icon: Icons.tasks },
   { to: "/workspace", label: "Workspace", icon: Icons.workspace },
   { to: "/calendar", label: "Calendar", icon: Icons.calendar },
+  { to: "/announcements", label: "Announcements", icon: Icons.announcement },
 ];
 
 function UserLayout() {
   const { user } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMaintenance, setIsMaintenance] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const checkMaintenance = async () => {
+      try {
+        const response = await api.get('/system/settings');
+        if (response.data && response.data.maintenanceMode) {
+          setIsMaintenance(true);
+        }
+      } catch (error) {
+        console.error('Error checking system status:', error);
+      }
+    };
+    checkMaintenance();
+  }, []);
+
+  if (isMaintenance) {
+    return (
+      <div className="maintenance-overlay">
+        <div className="maintenance-card">
+          <div className="maintenance-icon">🛠️</div>
+          <h1 className="maintenance-title">Under Maintenance</h1>
+          <p className="maintenance-text">
+            Our system is currently undergoing scheduled maintenance to improve your experience. 
+            We'll be back online shortly!
+          </p>
+          <div className="maintenance-footer">Team UrgenSee</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   const userInitial = user?.firstName?.charAt(0).toUpperCase() || "U";
   const closeSidebar = () => setSidebarOpen(false);
@@ -110,10 +155,13 @@ function UserLayout() {
         </nav>
       </aside>
 
-      <main className="main-content">
-        <Outlet />
+      <div className="main-wrapper">
+        <main className="main-content">
+          <NotificationBanner />
+          <Outlet />
+        </main>
         <Footer />
-      </main>
+      </div>
     </div>
   );
 }

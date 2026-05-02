@@ -3,7 +3,7 @@
  */
 export function calculateTaskStatus(tasks, targetTaskId) {
   const now = Date.now();
-  const targetTaskData = tasks.find(t => t.id === targetTaskId);
+  const targetTaskData = tasks.find(t => (t._id || t.id) === targetTaskId);
   
   if (!targetTaskData) return null;
 
@@ -45,7 +45,7 @@ export function calculateTaskStatus(tasks, targetTaskId) {
     const newStart = endTime - remainingMs;
 
     return {
-      id: task.id,
+      id: task._id || task.id,
       start: newStart,
       end: endTime,
       originalStart: task.startDate ? new Date(task.startDate).getTime() : 0

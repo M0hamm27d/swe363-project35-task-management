@@ -3,6 +3,7 @@ const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const GlobalSettings = require('../models/GlobalSettings');
+const DailyStat = require('../models/DailyStat');
 
 /**
  * @desc    Helper function to generate a JWT token
@@ -56,7 +57,19 @@ exports.registerUser = async (req, res) => {
     // 4. Generate a JWT token for immediate login
     const token = createToken(user._id, 'user');
 
-    // 5. Send back user data (excluding password) and the token
+    // 5. Silently record this user as active today for Admin Analytics
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      await DailyStat.findOneAndUpdate(
+        { date: today },
+        { $addToSet: { activeUsers: user._id } },
+        { upsert: true }
+      );
+    } catch (statError) {
+      console.error('Failed to update daily stat:', statError); // Non-blocking
+    }
+
+    // 6. Send back user data (excluding password) and the token
     res.status(201).json({
       _id: user._id,
       firstName: user.firstName,
@@ -99,7 +112,19 @@ exports.loginUser = async (req, res) => {
     // 4. Generate a new JWT token
     const token = createToken(user._id, 'user');
 
-    // 5. Respond with user details and token
+    // 5. Silently record this user as active today for Admin Analytics
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      await DailyStat.findOneAndUpdate(
+        { date: today },
+        { $addToSet: { activeUsers: user._id } },
+        { upsert: true }
+      );
+    } catch (statError) {
+      console.error('Failed to update daily stat:', statError); // Non-blocking
+    }
+
+    // 6. Respond with user details and token
     res.json({
       _id: user._id,
       firstName: user.firstName,

@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Admin = require('../models/Admin');
+const { isPasswordStrong } = require('../utils/validators');
 
 /**
  * @desc    Get current user/admin profile
@@ -19,13 +20,14 @@ exports.getProfile = async (req, res) => {
  */
 exports.updateProfile = async (req, res) => {
   try {
-    const { firstName, lastName } = req.body;
+    const { firstName, lastName, email } = req.body;
 
     // We already have the user document in req.user
     const user = req.user;
 
     user.firstName = firstName || user.firstName;
     user.lastName = lastName || user.lastName;
+    if (email) user.email = email;
 
     const updatedUser = await user.save();
 
@@ -52,6 +54,13 @@ exports.updateProfile = async (req, res) => {
 exports.updatePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
+
+    // NFR: Password Strength Validation
+    if (!isPasswordStrong(newPassword)) {
+      return res.status(400).json({ 
+        message: 'New password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.' 
+      });
+    }
 
     // 1. Find the user with the password field (since it was excluded in middleware)
     let user;

@@ -15,6 +15,7 @@ import WorkspaceTasks from "./pages/user/WorkspaceTasks";
 import WorkspaceBoard from "./pages/user/WorkspaceBoard";
 import Calendar from "./pages/user/Calendar";
 import Profile from "./pages/user/Profile";
+import UserAnnouncements from "./pages/user/UserAnnouncements";
 import UserLayout from "./layouts/UserLayout";
 
 // Admin pages
@@ -45,6 +46,7 @@ function App() {
                 <Route path="workspace/:id" element={<WorkspaceBoard />} />
                 <Route path="calendar" element={<Calendar />} />
                 <Route path="profile" element={<Profile />} />
+                <Route path="announcements" element={<UserAnnouncements />} />
               </Route>
 
               {/* Admin */}

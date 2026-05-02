@@ -28,7 +28,7 @@ const EyeOffIcon = () => (
 
 function UserSignup() {
   const navigate = useNavigate();
-  const { login } = useUser();
+  const { register } = useUser();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -47,13 +47,12 @@ function UserSignup() {
   };
 
   const validatePassword = (pass) => {
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-    return regex.test(pass);
+    return pass.length >= 6;
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
+    e.preventDefault();
+    setError('');
 
   const { firstName, lastName, email, password, confirmPassword } = formData;
 
@@ -62,41 +61,24 @@ function UserSignup() {
     return;
   }
 
-  if (!validatePassword(password)) {
-    setError('Password must be at least 8 characters long and include a letter, a number, and a special character.');
-    return;
-  }
+    if (!validatePassword(password)) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
 
   if (password !== confirmPassword) {
     setError('Passwords do not match.');
     return;
   }
 
-  try {
-    const res = await fetch('http://localhost:5000/api/auth/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ firstName, lastName, email, password })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setError(data.message || 'Signup failed');
-      return;
+    const result = await register({ firstName, lastName, email, password }, false);
+    
+    if (result.success) {
+      navigate('/my-tasks');
+    } else {
+      setError(result.message);
     }
-
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data));
-
-    login(data); 
-    navigate('/my-tasks');
-  } catch (err) {
-    setError('Server error');
-  }
-};
+  };
 
   return (
     <div className="signup-page">

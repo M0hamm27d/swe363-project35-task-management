@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '../../context/UserContext';
 import Logo from '../../components/Logo';
 import './UserLogin.css';
 
@@ -27,6 +28,7 @@ const EyeOffIcon = () => (
 
 function UserLogin() {
   const navigate = useNavigate();
+  const { login } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -34,43 +36,31 @@ function UserLogin() {
   const [error, setError] = useState('');
 
   const validatePassword = (pass) => {
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-    return regex.test(pass);
+    return pass.length >= 6;
   };
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setError('');
+    e.preventDefault();
+    setError('');
 
   if (!email || !password) {
     setError('Please fill in all fields.');
     return;
   }
 
-  try {
-    const res = await fetch('http://localhost:5000/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setError(data.message || 'Login failed');
+    if (!validatePassword(password)) {
+      setError('Invalid credentials.');
       return;
     }
 
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data));
-
-    navigate('/my-tasks');
-  } catch (err) {
-    setError('Server error');
-  }
-};
+    const result = await login(email, password, false);
+    
+    if (result.success) {
+      navigate('/my-tasks');
+    } else {
+      setError(result.message); // This will show "Invalid credentials" from the backend!
+    }
+  };
 
   return (
     <div className="login-page">

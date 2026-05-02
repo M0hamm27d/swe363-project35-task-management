@@ -13,19 +13,22 @@ const UserIcon = () => (
 );
 
 function Profile() {
-  const { user, login, logout } = useUser();
+  const { user, login, logout, updateProfile, updatePassword } = useUser();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     email: user?.email || '',
+    currentPassword: '',
     password: '',
     confirmPassword: ''
   });
 
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [currentFocused, setCurrentFocused] = useState(false);
   const [passFocused, setPassFocused] = useState(false);
   const [confirmFocused, setConfirmFocused] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -52,9 +55,35 @@ function Profile() {
     setShowConfirm(true);
   };
 
-  const finalizeChanges = () => {
-    // In a real app we'd call an API here. 
-    // For this prototype, we just log out as requested.
+  const finalizeChanges = async () => {
+    // 1. Update basic profile info
+    const profileRes = await updateProfile({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email
+    });
+
+    if (!profileRes.success) {
+      setError(profileRes.message);
+      setShowConfirm(false);
+      return;
+    }
+
+    // 2. Update password if provided
+    if (formData.password) {
+      if (!formData.currentPassword) {
+        setError('Current password is required to change password.');
+        setShowConfirm(false);
+        return;
+      }
+      const passRes = await updatePassword(formData.currentPassword, formData.password);
+      if (!passRes.success) {
+        setError(passRes.message);
+        setShowConfirm(false);
+        return;
+      }
+    }
+
     logout();
     navigate('/');
   };
@@ -64,7 +93,7 @@ function Profile() {
       <div className="signup-card">
         <header className="signup-header">
           <div className="user-icon-wrapper"><UserIcon /></div>
-          <Logo size="medium" isPrivacyMode={(passFocused && !showPass) || (confirmFocused && !showConfirmPass)} />
+          <Logo size="medium" isPrivacyMode={(currentFocused && !showCurrentPass) || (passFocused && !showPass) || (confirmFocused && !showConfirmPass)} />
           <h2 className="welcome-msg">Edit Profile</h2>
         </header>
 
@@ -86,7 +115,38 @@ function Profile() {
           </div>
 
           <div className="input-group">
-            <label className="input-label" htmlFor="password">Change Password</label>
+            <label className="input-label" htmlFor="currentPassword">Current Password (Required for Password Change)</label>
+            <div className="input-field-wrapper">
+              <input
+                id="currentPassword"
+                type={showCurrentPass ? 'text' : 'password'}
+                className="signup-input"
+                placeholder="Enter current password"
+                value={formData.currentPassword}
+                onChange={handleChange}
+                onFocus={() => setCurrentFocused(true)}
+                onBlur={() => setCurrentFocused(false)}
+              />
+              <button type="button" className="eye-toggle-btn" onClick={() => setShowCurrentPass(!showCurrentPass)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {showCurrentPass ? (
+                    <>
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </>
+                  ) : (
+                    <>
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </>
+                  )}
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div className="input-group">
+            <label className="input-label" htmlFor="password">New Password</label>
             <div className="input-field-wrapper">
               <input
                 id="password"
@@ -149,7 +209,7 @@ function Profile() {
 
           <div className="input-group">
             <label className="input-label" htmlFor="userId">ID</label>
-            <input id="userId" className="signup-input" value="USR-9921-X" readOnly style={{ background: 'rgba(255,255,255,0.02)', color: '#8ab4f8', cursor: 'default' }} />
+            <input id="userId" className="signup-input" value={user?._id || user?.id || ''} readOnly style={{ background: 'rgba(255,255,255,0.02)', color: '#8ab4f8', cursor: 'default' }} />
           </div>
 
           {error && <div className="signup-error">{error}</div>}
@@ -167,7 +227,7 @@ function Profile() {
             <h3>Confirm Profile Changes</h3>
             <p>Are you sure you want to change your info? This will log you out automatically to apply the updates.</p>
             <div className="modal-buttons">
-              <button className="confirm-yes" onClick={finalizeChanges}>Yes, Update & Logout</button>
+              <button className="logout-btn-secondary" onClick={finalizeChanges}>Yes, Update & Logout</button>
               <button className="confirm-no" onClick={() => setShowConfirm(false)}>Cancel</button>
             </div>
           </div>

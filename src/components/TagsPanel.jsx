@@ -21,9 +21,9 @@ function TagForm({
   onConfirm,      // (name, color) => void
   onCancel,
 }) {
-  const [name,       setName]       = useState(initialName);
-  const [color,      setColor]      = useState(initialColor || colors[0] || '#4ade80');
-  const [nameError,  setNameError]  = useState('');
+  const [name, setName] = useState(initialName);
+  const [color, setColor] = useState(initialColor || colors[0] || '#4ade80');
+  const [nameError, setNameError] = useState('');
   const [colorError, setColorError] = useState('');
 
   // ── Color palette ──────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ function TagForm({
     } else {
       const nameDuplicate = tags.some(
         (t) =>
-          t.name.toLowerCase() === trimmed.toLowerCase() &&
+          t.name && t.name.toLowerCase() === trimmed.toLowerCase() &&
           t.name !== editingTagName  // allow keeping same name when editing
       );
       if (nameDuplicate) { setNameError('Tag name already exists'); valid = false; }
@@ -74,7 +74,7 @@ function TagForm({
     // Color validation
     const colorDuplicate = tags.some(
       (t) =>
-        t.color.toLowerCase() === color.toLowerCase() &&
+        t.color && t.color.toLowerCase() === color.toLowerCase() &&
         t.name !== editingTagName  // allow keeping same color when editing
     );
     if (colorDuplicate) { setColorError('This color is already used by another tag'); valid = false; }
@@ -162,7 +162,7 @@ function TagForm({
           <span
             className="tag-chip-preview"
             style={{
-              background:  `${color}35`,
+              background: `${color}35`,
               color,
               borderColor: `${color}60`,
             }}
@@ -187,8 +187,8 @@ function TagForm({
 
 // ─── TagsPanel ────────────────────────────────────────────────────────────────
 function TagsPanel({ tags, tasks, selectedTag, onSelectTag, onEditTag, onDeleteTag, onAddTag, selectionOnly = false }) {
-  const [colors,     setColors]     = useState(PRESET_COLORS);
-  const [openMenu,   setOpenMenu]   = useState(null);
+  const [colors, setColors] = useState(PRESET_COLORS);
+  const [openMenu, setOpenMenu] = useState(null);
   const [editingTag, setEditingTag] = useState(null);  // tag object being edited | null
   const [isCreating, setIsCreating] = useState(false);
 
@@ -260,7 +260,7 @@ function TagsPanel({ tags, tasks, selectedTag, onSelectTag, onEditTag, onDeleteT
             onClick={() => onSelectTag(null)}
           >
             <span className="tag-chip__name">All</span>
-            <span className="tag-chip__count">{tasks.length}</span>
+            <span className="tag-chip__count">{tags.length}</span>
           </button>
         </div>
 
@@ -273,9 +273,9 @@ function TagsPanel({ tags, tasks, selectedTag, onSelectTag, onEditTag, onDeleteT
             <button
               className={`tag-chip ${selectedTag === tag.name ? 'tag-chip--active' : ''}`}
               style={{
-                background:  selectedTag === tag.name ? `${tag.color}40` : `${tag.color}18`,
+                background: selectedTag === tag.name ? `${tag.color}40` : `${tag.color}18`,
                 borderColor: `${tag.color}55`,
-                color:        tag.color,
+                color: tag.color,
               }}
               onClick={() => onSelectTag(selectedTag === tag.name ? null : tag.name)}
             >

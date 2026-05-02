@@ -1,5 +1,6 @@
 const Workspace = require('../models/Workspace');
 const WorkspaceMember = require('../models/WorkspaceMember');
+const Task = require('../models/Task');
 
 /**
  * @desc    Create a new workspace
@@ -43,11 +44,16 @@ exports.getWorkspaces = async (req, res) => {
 
     // 3. For each workspace, fetch the members and the current user's role
     const workspacesWithDetails = await Promise.all(workspaces.map(async (ws) => {
-      const allMembers = await WorkspaceMember.find({ workspaceId: ws._id }).populate('userId', 'firstName lastName');
+      const allMembers = await WorkspaceMember.find({ workspaceId: ws._id }).populate('userId', 'firstName lastName email');
       
       return {
         ...ws,
         members: allMembers.map(m => `${m.userId.firstName} ${m.userId.lastName}`),
+        memberDetails: allMembers.map(m => ({
+          id: m.userId._id,
+          name: `${m.userId.firstName} ${m.userId.lastName}`,
+          email: m.userId.email
+        })),
         role: allMembers.find(m => m.userId._id.toString() === req.user._id.toString())?.role,
         leader: allMembers.find(m => m.role === 'leader')?.userId?.firstName // For the "Leader: Name" display
       };
@@ -88,7 +94,8 @@ exports.disbandWorkspace = async (req, res) => {
 
     await Workspace.findByIdAndDelete(req.params.id);
     await WorkspaceMember.deleteMany({ workspaceId: req.params.id });
-    // Note: You might also want to delete all tasks in this workspace
+    await Task.deleteMany({ workspaceId: req.params.id });
+    
     res.json({ message: 'Workspace disbanded successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });

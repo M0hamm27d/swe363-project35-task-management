@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '../../context/UserContext';
 import Logo from '../../components/Logo';
 import './AdminLogin.css';
 
@@ -28,6 +29,7 @@ const EyeOffIcon = () => (
 
 function AdminLogin() {
   const navigate = useNavigate();
+  const { login } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -40,114 +42,105 @@ function AdminLogin() {
   };
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setError('');
+    e.preventDefault();
+    setError('');
 
-  if (!email || !password) {
-    setError('Please fill in all fields.');
-    return;
-  }
-
-  try {
-    const res = await fetch('http://localhost:5000/api/auth/admin/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setError(data.message || 'Login failed');
+    if (!email || !password) {
+      setError('Please fill in all fields.');
       return;
     }
 
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data));
+    if (!validatePassword(password)) {
+      setError('Invalid admin credentials format.');
+      return;
+    }
 
-    navigate('/admin');
-  } catch (err) {
-    setError('Server error');
-  }
-};
+    // Call login with isAdmin = true
+    const result = await login(email, password, true);
 
-  return (
-    <div className="login-page">
-      <div className="login-card">
-        {/* Back Arrow - Linked to the card box border */}
-        <Link to="/" className="back-arrow-btn" aria-label="Back to landing page">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-        </Link>
+    if (result.success) {
+      // Redirect to Admin Dashboard
+      navigate('/admin');
+    } else {
+      setError(result.message);
+    }
+  };
 
-        {/* Header: Admin Icon, Logo, Welcome */}
-        <header className="login-header">
-          <div className="user-icon-wrapper">
-            <AdminIcon />
-          </div>
-          <Logo size="medium" isPrivacyMode={isPasswordFocused && !showPassword} />
-          <h2 className="welcome-msg">Welcome Admin</h2>
-        </header>
+    return (
+      <div className="login-page">
+        <div className="login-card">
+          {/* Back Arrow - Linked to the card box border */}
+          <Link to="/" className="back-arrow-btn" aria-label="Back to landing page">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+          </Link>
 
-        {/* Login Form */}
-        <form className="login-form" onSubmit={handleLogin}>
-          <div className="input-group">
-            <label className="input-label" htmlFor="admin-email">Admin Email</label>
-            <div className="input-field-wrapper">
-              <input
-                id="admin-email"
-                type="email"
-                className="login-input"
-                placeholder="admin@urgensee.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+          {/* Header: Admin Icon, Logo, Welcome */}
+          <header className="login-header">
+            <div className="user-icon-wrapper">
+              <AdminIcon />
             </div>
-          </div>
+            <Logo size="medium" isPrivacyMode={isPasswordFocused && !showPassword} />
+            <h2 className="welcome-msg">Welcome Admin</h2>
+          </header>
 
-          <div className="input-group">
-            <label className="input-label" htmlFor="admin-password">Secure Password</label>
-            <div className="input-field-wrapper">
-              <input
-                id="admin-password"
-                type={showPassword ? 'text' : 'password'}
-                className="login-input"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onFocus={() => setIsPasswordFocused(true)}
-                onBlur={() => setIsPasswordFocused(false)}
-                required
-              />
-              <button
-                type="button"
-                className="eye-toggle-btn"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-              </button>
+          {/* Login Form */}
+          <form className="login-form" onSubmit={handleLogin}>
+            <div className="input-group">
+              <label className="input-label" htmlFor="admin-email">Admin Email</label>
+              <div className="input-field-wrapper">
+                <input
+                  id="admin-email"
+                  type="email"
+                  className="login-input"
+                  placeholder="admin@urgensee.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          {error && <div className="login-error">{error}</div>}
+            <div className="input-group">
+              <label className="input-label" htmlFor="admin-password">Secure Password</label>
+              <div className="input-field-wrapper">
+                <input
+                  id="admin-password"
+                  type={showPassword ? 'text' : 'password'}
+                  className="login-input"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setIsPasswordFocused(true)}
+                  onBlur={() => setIsPasswordFocused(false)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="eye-toggle-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
+            </div>
 
-          <button type="submit" className="login-btn-primary">
-            Authenticate Admin
-          </button>
-        </form>
+            {error && <div className="login-error">{error}</div>}
 
-        <footer className="login-footer">
-          Corporate access only. Unauthorised entry is logged.
-        </footer>
+            <button type="submit" className="login-btn-primary">
+              Authenticate Admin
+            </button>
+          </form>
+
+          <footer className="login-footer">
+            Corporate access only. Unauthorised entry is logged.
+          </footer>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-export default AdminLogin;
+  export default AdminLogin;

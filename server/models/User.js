@@ -29,6 +29,14 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date,
     default: Date.now
+  },
+  dailyUsageMinutes: {
+    type: Number,
+    default: 0
+  },
+  lastActiveAt: {
+    type: Date,
+    default: Date.now
   }
 }, {
   timestamps: true // This automatically adds 'createdAt' and 'updatedAt'

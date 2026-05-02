@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { mockInvites } from '../../data/mockTasks';
 import { useWorkspaces } from '../../context/WorkspacesContext';
 import { countWords } from '../../utils/taskHelpers';
 import './WorkspaceTasks.css';
@@ -93,8 +92,7 @@ function InviteCard({ invite, onJoin, onReject }) {
 }
 
 function WorkspaceTasks() {
-  const { workspaces, addWorkspace } = useWorkspaces();
-  const [invites, setInvites] = useState(mockInvites);
+  const { workspaces, addWorkspace, invites, respondToInvite } = useWorkspaces();
   const [inviteToReject, setInviteToReject] = useState(null);
 
   // ── New Workspace Modal state ────────────────────────────────────────────
@@ -140,19 +138,11 @@ function WorkspaceTasks() {
   }
 
   function handleJoin(invite) {
-    setInvites(prev => prev.filter(inv => inv.id !== invite.id));
-    const newWs = {
-      id: invite.id,
-      name: invite.name,
-      color: invite.color,
-      description: "A newly joined workspace.",
-      members: [invite.leader, "You"]
-    };
-    addWorkspace(newWs);
+    respondToInvite(invite.id, 'accepted');
   }
 
   function confirmReject() {
-    setInvites(prev => prev.filter(inv => inv.id !== inviteToReject.id));
+    respondToInvite(inviteToReject.id, 'declined');
     setInviteToReject(null);
   }
 

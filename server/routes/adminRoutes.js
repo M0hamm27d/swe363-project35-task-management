@@ -1,13 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { 
+const {
   getDashboardStats,
-  createAnnouncement, 
-  deleteAnnouncement, 
-  getAllUsers, 
-  fetchUserByEmail,
-  toggleUserBan, 
-  updateSettings 
+  createAnnouncement,
+  updateAnnouncement,
+  deleteAnnouncement,
+  getAllUsers,
+  searchUserByEmail,
+  toggleUserBan,
+  updateSettings,
+  deleteUser
 } = require('../controllers/adminController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
@@ -20,12 +22,14 @@ router.get('/stats', getDashboardStats);
 
 // Announcements
 router.post('/announcements', createAnnouncement);
+router.put('/announcements/:id', updateAnnouncement);
 router.delete('/announcements/:id', deleteAnnouncement);
 
 // User Management
 router.get('/users', getAllUsers);
-router.post('/users/fetch', fetchUserByEmail);
+router.get('/users/search', searchUserByEmail);
 router.put('/users/:id/ban', toggleUserBan);
+router.delete('/users/:id', deleteUser);
 
 // System Settings
 router.put('/settings', updateSettings);

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, Navigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 import Logo from "../components/Logo";
 import Footer from "../components/Footer";
 import "./AdminLayout.css";
@@ -57,6 +58,13 @@ const Icons = {
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   ),
+  logout: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  ),
 };
 
 const navItems = [
@@ -68,10 +76,16 @@ const navItems = [
 ];
 
 function AdminLayout() {
+  const { adminUser, logout } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const userInitial = "A";
   const closeSidebar = () => setSidebarOpen(false);
+
+  if (!adminUser) {
+    return <Navigate to="/admin-login" replace />;
+  }
+
+  const userInitial = adminUser?.firstName?.charAt(0).toUpperCase() || "A";
 
   return (
     <div className="admin-layout">

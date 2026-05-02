@@ -61,10 +61,17 @@ exports.sendInvite = async (req, res) => {
 exports.getMyInvites = async (req, res) => {
   try {
     const invites = await WorkspaceInvite.find({ receiverId: req.user._id, status: 'pending' })
-      .populate('workspaceId', 'name')
-      .populate('senderId', 'firstName lastName');
+      .populate('workspaceId', 'name colorCode')
+      .populate('senderId', 'firstName lastName')
+      .lean();
     
-    res.json(invites);
+    // Fetch member count for each workspace
+    const invitesWithCounts = await Promise.all(invites.map(async (inv) => {
+      const count = await WorkspaceMember.countDocuments({ workspaceId: inv.workspaceId._id });
+      return { ...inv, memberCount: count };
+    }));
+    
+    res.json(invitesWithCounts);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -39,6 +39,34 @@ const protect = async (req, res, next) => {
         return res.status(503).json({ message: 'System is currently under maintenance. Please try again later.' });
       }
 
+      // 5. Track Daily Activity (Only for regular users)
+      if (req.user.role === 'user') {
+        const now = new Date();
+        const lastActive = new Date(req.user.lastActiveAt || now);
+        
+        // Is it a new day?
+        const isNewDay = now.toDateString() !== lastActive.toDateString();
+        
+        if (isNewDay) {
+          req.user.dailyUsageMinutes = 0;
+        } else {
+          // Calculate difference in minutes since last activity
+          // We limit the increment to prevent "gaming" the system (max 5 min per request interval)
+          const diffMs = now - lastActive;
+          const diffMins = Math.min(Math.floor(diffMs / 60000), 5); 
+          if (diffMins > 0) {
+            req.user.dailyUsageMinutes += diffMins;
+          }
+        }
+        
+        req.user.lastActiveAt = now;
+        // Save the updated usage data in the background
+        await User.findByIdAndUpdate(req.user._id, {
+          dailyUsageMinutes: req.user.dailyUsageMinutes,
+          lastActiveAt: req.user.lastActiveAt
+        });
+      }
+
       next();
     } catch (error) {
       res.status(401).json({ message: 'Not authorized, token failed' });
