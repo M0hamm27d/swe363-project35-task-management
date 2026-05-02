@@ -36,8 +36,7 @@ function UserLogin() {
   const [error, setError] = useState('');
 
   const validatePassword = (pass) => {
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-    return regex.test(pass);
+    return pass.length >= 6;
   };
 
   const handleLogin = async (e) => {
@@ -50,7 +49,7 @@ function UserLogin() {
     }
 
     if (!validatePassword(password)) {
-      setError('Password must be at least 8 characters long and include a letter, a number, and a special character.');
+      setError('Invalid credentials.');
       return;
     }
 

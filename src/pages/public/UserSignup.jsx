@@ -47,8 +47,7 @@ function UserSignup() {
   };
 
   const validatePassword = (pass) => {
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-    return regex.test(pass);
+    return pass.length >= 6;
   };
 
   const handleSubmit = async (e) => {
@@ -63,7 +62,7 @@ function UserSignup() {
     }
 
     if (!validatePassword(password)) {
-      setError('Password must be at least 8 characters long and include a letter, a number, and a special character.');
+      setError('Password must be at least 6 characters long.');
       return;
     }
 

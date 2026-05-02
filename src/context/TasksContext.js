@@ -1,20 +1,31 @@
-import React, { createContext, useContext, useState } from 'react';
-import mockTasks from '../data/mockTasks';
-import { extractTags } from '../utils/taskHelpers';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../utils/api';
+import { useUser } from './UserContext';
 
 const TasksContext = createContext();
 
 export function TasksProvider({ children }) {
-  // Initialize tasks with the same logic used in pages
-  const [tasks, setTasks] = useState(
-    mockTasks.map((t) => ({ ...t, completed: t.progress === 100 || t.completed }))
-  );
+  const { user } = useUser();
+  const [tasks, setTasks] = useState([]);
+  const [tags, setTags] = useState([]);
 
-  const [tags, setTags] = useState(() => {
+  // Fetch real tasks automatically whenever a user logs in!
+  useEffect(() => {
+    if (user) {
+      fetchPersonalTasks();
+    } else {
+      // Clear tasks if user logs out
+      setTasks([]);
+      setTags([]);
+    }
+  }, [user]);
+
+  // Recalculate tags dynamically based on the tasks we fetch
+  useEffect(() => {
     const seen = new Set();
     const result = [];
     tasks.forEach(t => {
-      if (t.tag) {
+      if (t.tag && t.tag.name) {
         const key = `${t.tag.name}-${t.workspaceId || 'personal'}`;
         if (!seen.has(key)) {
           seen.add(key);
@@ -22,9 +33,132 @@ export function TasksProvider({ children }) {
         }
       }
     });
-    return result;
-  });
+    setTags(result);
+  }, [tasks]);
 
+  const fetchPersonalTasks = async () => {
+    try {
+      const response = await api.get('/tasks/personal');
+      
+      // MongoDB uses '_id', but your React app was built using 'id'. 
+      // We map it here so we don't have to change 100 React components!
+      const formattedTasks = response.data.map(t => ({
+        ...t,
+        id: t._id,
+        workspaceId: 'personal' // Frontend expects 'personal' instead of null
+      }));
+      
+      setTasks(prev => {
+        const workspaceTasks = prev.filter(t => t.workspaceId !== 'personal');
+        return [...workspaceTasks, ...formattedTasks];
+      });
+    } catch (error) {
+      console.error('Failed to fetch personal tasks', error);
+    }
+  };
+
+  const addTask = async (newTaskFields) => {
+    // 1. Optimistic Update: Show immediately on UI
+    const tempId = Date.now().toString(); // fake ID until server responds
+    const tempTask = {
+      ...newTaskFields,
+      id: tempId,
+      completed: false,
+      progress: 0,
+      workspaceId: newTaskFields.workspaceId
+    };
+    
+    setTasks((prev) => [tempTask, ...prev]);
+
+    try {
+      // Frontend sends 'personal', Backend expects null for personal tasks
+      const payload = {
+        ...newTaskFields,
+        workspaceId: newTaskFields.workspaceId === 'personal' ? null : newTaskFields.workspaceId
+      };
+      
+      const response = await api.post('/tasks', payload);
+      
+      const newTask = { 
+        ...response.data, 
+        id: response.data._id, 
+        workspaceId: newTaskFields.workspaceId 
+      };
+      
+      // Replace the fake temp task with the real task from the database
+      setTasks((prev) => prev.map(t => t.id === tempId ? newTask : t));
+      return newTask;
+    } catch (error) {
+      console.error('Failed to create task', error.response?.data || error);
+      // Remove the fake task because the server rejected it
+      setTasks((prev) => prev.filter(t => t.id !== tempId));
+      alert(`Error saving task: ${error.response?.data?.message || 'Server error'}`);
+    }
+  };
+
+  const updateTask = async (id, updatedFields) => {
+    try {
+      // 1. Optimistic Update (Update UI instantly)
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, ...updatedFields } : t))
+      );
+      
+      // 2. Send to backend
+      await api.put(`/tasks/${id}`, updatedFields);
+    } catch (error) {
+      console.error('Failed to update task', error);
+      fetchPersonalTasks(); // Revert UI if server fails
+    }
+  };
+
+  const deleteTask = async (id) => {
+    try {
+      // 1. Optimistic Update
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+      
+      // 2. Send to backend
+      await api.delete(`/tasks/${id}`);
+    } catch (error) {
+      console.error('Failed to delete task', error);
+      fetchPersonalTasks(); // Revert UI if server fails
+    }
+  };
+
+  const toggleComplete = async (id) => {
+    try {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      
+      const newStatus = !task.completed;
+      
+      // Optimistic update
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, completed: newStatus } : t))
+      );
+      
+      await api.put(`/tasks/${id}`, { completed: newStatus });
+    } catch (error) {
+      console.error('Failed to toggle task', error);
+    }
+  };
+
+  const clearCompleted = async () => {
+    try {
+      const completedTasks = tasks.filter(t => t.completed && t.workspaceId === 'personal');
+      
+      // Optimistic update
+      setTasks((prev) => prev.filter((t) => !t.completed));
+      
+      // Delete from backend sequentially
+      for (const t of completedTasks) {
+        await api.delete(`/tasks/${t.id}`);
+      }
+    } catch (error) {
+      console.error('Failed to clear tasks', error);
+    }
+  };
+
+  // Local Tag Management
   const addTag = (tag, workspaceId) => {
     setTags((prev) => {
       if (prev.some((t) => t.name.toLowerCase() === tag.name.toLowerCase() && t.workspaceId === workspaceId)) return prev;
@@ -33,11 +167,9 @@ export function TasksProvider({ children }) {
   };
 
   const editTag = (oldName, updatedTag, workspaceId) => {
-    // 1. Update the tags list
     setTags((prev) =>
       prev.map((t) => (t.name === oldName && t.workspaceId === workspaceId ? { ...updatedTag, workspaceId } : t))
     );
-    // 2. Update all tasks using this tag in this workspace
     setTasks((prev) =>
       prev.map((t) =>
         (t.tag?.name === oldName && t.workspaceId === workspaceId) ? { ...t, tag: updatedTag } : t
@@ -46,46 +178,12 @@ export function TasksProvider({ children }) {
   };
 
   const deleteTag = (tagName, workspaceId) => {
-    // 1. Remove from tags list
     setTags((prev) => prev.filter((t) => !(t.name === tagName && t.workspaceId === workspaceId)));
-    // 2. Clear from all tasks using this tag in this workspace
     setTasks((prev) =>
       prev.map((t) =>
         (t.tag?.name === tagName && t.workspaceId === workspaceId) ? { ...t, tag: null } : t
       )
     );
-  };
-
-  const addTask = (newTaskFields) => {
-    const newId = (tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) : 0) + 1;
-    const newTask = { 
-      id: newId, 
-      isVisible: true,
-      workspaceId: null, // default
-      ...newTaskFields 
-    };
-    setTasks((prev) => [newTask, ...prev]);
-    return newTask;
-  };
-
-  const updateTask = (id, updatedFields) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, ...updatedFields } : t))
-    );
-  };
-
-  const deleteTask = (id) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const toggleComplete = (id) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
-    );
-  };
-
-  const clearCompleted = () => {
-    setTasks((prev) => prev.filter((t) => !t.completed));
   };
 
   return (
@@ -100,6 +198,7 @@ export function TasksProvider({ children }) {
       addTag,
       editTag,
       deleteTag,
+      fetchPersonalTasks
     }}>
       {children}
     </TasksContext.Provider>
