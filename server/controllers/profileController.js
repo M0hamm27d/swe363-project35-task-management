@@ -19,13 +19,14 @@ exports.getProfile = async (req, res) => {
  */
 exports.updateProfile = async (req, res) => {
   try {
-    const { firstName, lastName } = req.body;
+    const { firstName, lastName, email } = req.body;
 
     // We already have the user document in req.user
     const user = req.user;
 
     user.firstName = firstName || user.firstName;
     user.lastName = lastName || user.lastName;
+    if (email) user.email = email;
 
     const updatedUser = await user.save();
 

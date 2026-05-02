@@ -160,7 +160,8 @@
 .tag-dropdown {
   position: absolute;
   right: 0;
-  top: 30px;
+  bottom: 100%;
+  margin-bottom: 6px;
   background: #0f1e38;
   border: 1px solid #1a2a4a;
   border-radius: 10px;

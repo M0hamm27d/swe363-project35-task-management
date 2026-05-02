@@ -39,14 +39,14 @@ exports.createTag = async (req, res) => {
     // If it's a WORKSPACE tag, check if the user is a Leader
     if (workspaceId) {
       const membership = await WorkspaceMember.findOne({ workspaceId, userId: req.user._id });
-      if (!membership || membership.role !== 'Admin') {
+      if (!membership || membership.role !== 'leader') {
         return res.status(403).json({ message: 'Only team leaders can create tags in a workspace.' });
       }
     }
 
     const tag = await Tag.create({
       name,
-      color,
+      colorCode: color,
       workspaceId: workspaceId || null,
       userId: req.user._id
     });
@@ -77,9 +77,14 @@ exports.updateTag = async (req, res) => {
         workspaceId: tag.workspaceId, 
         userId: req.user._id 
       });
-      if (!membership || membership.role !== 'Admin') {
+      if (!membership || membership.role !== 'leader') {
         return res.status(403).json({ message: 'Only leaders can update workspace tags.' });
       }
+    }
+
+    if (req.body.color) {
+      req.body.colorCode = req.body.color;
+      delete req.body.color;
     }
 
     const updatedTag = await Tag.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -109,7 +114,7 @@ exports.deleteTag = async (req, res) => {
         workspaceId: tag.workspaceId, 
         userId: req.user._id 
       });
-      if (!membership || membership.role !== 'Admin') {
+      if (!membership || membership.role !== 'leader') {
         return res.status(403).json({ message: 'Only leaders can delete workspace tags.' });
       }
     }

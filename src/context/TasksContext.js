@@ -20,24 +20,16 @@ export function TasksProvider({ children }) {
     }
   }, [user]);
 
-  // Recalculate tags dynamically based on the tasks we fetch
-  useEffect(() => {
-    const seen = new Set();
-    const result = [];
-    tasks.forEach(t => {
-      if (t.tag && t.tag.name) {
-        const key = `${t.tag.name}-${t.workspaceId || 'personal'}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          result.push({ ...t.tag, workspaceId: t.workspaceId || 'personal' });
-        }
-      }
-    });
-    setTags(result);
-  }, [tasks]);
+
 
   const fetchPersonalTasks = async () => {
     try {
+      const tagsRes = await api.get('/tags/workspace/null');
+      const formattedTags = tagsRes.data.personalTags.map(t => ({
+        ...t, id: t._id, color: t.colorCode, workspaceId: 'personal'
+      }));
+      setTags(prev => [...prev.filter(t => t.workspaceId !== 'personal'), ...formattedTags]);
+
       const response = await api.get('/tasks/personal');
       
       // MongoDB uses '_id', but your React app was built using 'id'. 
@@ -45,7 +37,8 @@ export function TasksProvider({ children }) {
       const formattedTasks = response.data.map(t => ({
         ...t,
         id: t._id,
-        workspaceId: 'personal' // Frontend expects 'personal' instead of null
+        workspaceId: 'personal', // Frontend expects 'personal' instead of null
+        tag: t.tag ? { ...t.tag, id: t.tag._id, color: t.tag.colorCode } : null
       }));
       
       setTasks(prev => {
@@ -59,11 +52,18 @@ export function TasksProvider({ children }) {
 
   const fetchWorkspaceTasks = async (workspaceId) => {
     try {
+      const tagsRes = await api.get(`/tags/workspace/${workspaceId}`);
+      const formattedTags = tagsRes.data.workspaceTags.map(t => ({
+        ...t, id: t._id, color: t.colorCode, workspaceId
+      }));
+      setTags(prev => [...prev.filter(t => t.workspaceId !== workspaceId), ...formattedTags]);
+
       const response = await api.get(`/tasks/workspace/${workspaceId}`);
       
       const formattedTasks = response.data.map(t => ({
         ...t,
-        id: t._id
+        id: t._id,
+        tag: t.tag ? { ...t.tag, id: t.tag._id, color: t.tag.colorCode } : null
       }));
       
       setTasks(prev => {
@@ -100,7 +100,8 @@ export function TasksProvider({ children }) {
       const newTask = { 
         ...response.data, 
         id: response.data._id, 
-        workspaceId: newTaskFields.workspaceId 
+        workspaceId: newTaskFields.workspaceId,
+        tag: newTaskFields.tag || null // keep the frontend tag object because backend returns an ID
       };
       
       // Replace the fake temp task with the real task from the database
@@ -176,32 +177,81 @@ export function TasksProvider({ children }) {
     }
   };
 
-  // Local Tag Management
-  const addTag = (tag, workspaceId) => {
+  // Tag Management — integrated with backend API
+  const addTag = async (tag, workspaceId) => {
+    // Guard against missing tag or name
+    if (!tag || !tag.name) {
+      console.warn('Attempted to add a tag without a name');
+      return;
+    }
+    // Optimistic update
+    const tempTag = { ...tag, workspaceId, id: Date.now().toString() };
     setTags((prev) => {
-      if (prev.some((t) => t.name.toLowerCase() === tag.name.toLowerCase() && t.workspaceId === workspaceId)) return prev;
-      return [...prev, { ...tag, workspaceId }];
+      // Prevent duplicate tag names (case‑insensitive) within the same workspace
+      const duplicate = prev.some((t) => t.name && t.name.toLowerCase() === tag.name.toLowerCase() && t.workspaceId === workspaceId);
+      if (duplicate) {
+        console.warn('Duplicate tag name');
+        return prev;
+      }
+      return [...prev, tempTag];
     });
+
+    try {
+      const payload = { name: tag.name, color: tag.color || '#e74c3c', workspaceId: workspaceId === 'personal' ? null : workspaceId, userId: null };
+      const response = await api.post('/tags', payload);
+      const newTag = { ...response.data, id: response.data._id, color: response.data.colorCode, workspaceId };
+      setTags((prev) => prev.map(t => t.id === tempTag.id ? newTag : t));
+    } catch (error) {
+      console.error('Failed to create tag', error);
+      setTags((prev) => prev.filter(t => t.id !== tempTag.id));
+      alert(`Error creating tag: ${error.response?.data?.message || 'Server error'}`);
+    }
   };
 
-  const editTag = (oldName, updatedTag, workspaceId) => {
+  const editTag = async (oldName, updatedTag, workspaceId) => {
+    // Find the tag to get its database ID
+    const existingTag = tags.find(t => t.name === oldName && t.workspaceId === workspaceId);
+
+    // Optimistic update
     setTags((prev) =>
-      prev.map((t) => (t.name === oldName && t.workspaceId === workspaceId ? { ...updatedTag, workspaceId } : t))
+      prev.map((t) => (t.name === oldName && t.workspaceId === workspaceId ? { ...updatedTag, workspaceId, id: t.id } : t))
     );
     setTasks((prev) =>
       prev.map((t) =>
         (t.tag?.name === oldName && t.workspaceId === workspaceId) ? { ...t, tag: updatedTag } : t
       )
     );
+
+    try {
+      if (existingTag && (existingTag._id || existingTag.id)) {
+        await api.put(`/tags/${existingTag._id || existingTag.id}`, {
+          name: updatedTag.name,
+          color: updatedTag.color
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update tag', error);
+    }
   };
 
-  const deleteTag = (tagName, workspaceId) => {
+  const deleteTag = async (tagName, workspaceId) => {
+    const existingTag = tags.find(t => t.name === tagName && t.workspaceId === workspaceId);
+
+    // Optimistic update
     setTags((prev) => prev.filter((t) => !(t.name === tagName && t.workspaceId === workspaceId)));
     setTasks((prev) =>
       prev.map((t) =>
         (t.tag?.name === tagName && t.workspaceId === workspaceId) ? { ...t, tag: null } : t
       )
     );
+
+    try {
+      if (existingTag && (existingTag._id || existingTag.id)) {
+        await api.delete(`/tags/${existingTag._id || existingTag.id}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete tag', error);
+    }
   };
 
   return (

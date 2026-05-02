@@ -59,8 +59,29 @@ export const UserProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateProfile = async (profileData) => {
+    try {
+      const response = await api.put('/profile', profileData);
+      const updatedUser = { ...user, ...response.data.user };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Failed to update profile' };
+    }
+  };
+
+  const updatePassword = async (currentPassword, newPassword) => {
+    try {
+      await api.put('/profile/password', { currentPassword, newPassword });
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Failed to update password' };
+    }
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, register, logout }}>
+    <UserContext.Provider value={{ user, login, register, logout, updateProfile, updatePassword }}>
       {children}
     </UserContext.Provider>
   );
